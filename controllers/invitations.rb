@@ -1,6 +1,6 @@
 module Controllers
   class Invitations < Arkaan::Utils::Controller
-    post '/' do
+    declare_route 'post', '/' do
       check_presence('session_id', 'campaign_id', 'account_id')
       account = Arkaan::Account.where(id: params['account_id']).first
       if account.nil?
