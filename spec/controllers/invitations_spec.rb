@@ -20,7 +20,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Nominal case' do
       before do
-        post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token, campaign_id: campaign.id.to_s}
+        post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
       end
       it 'Returns a Created (201) response code when the invitation is correctly created' do
         expect(last_response.status).to be 201
@@ -38,7 +38,7 @@ RSpec.describe Controllers::Invitations do
     describe 'Bad request errors' do
       describe 'The session is not given' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, campaign_id: campaign.id.to_s}
         end
         it 'Returns a Bad Request (400) response code when the session ID is not given' do
           expect(last_response.status).to be 400
@@ -50,23 +50,23 @@ RSpec.describe Controllers::Invitations do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
         end
       end
-      describe 'The account is not given' do
+      describe 'The username is not given' do
         before do
           post '/', {token: 'test_token', app_key: 'test_key', session_id: session.token, campaign_id: campaign.id.to_s}
         end
-        it 'Returns a Bad Request (400) response code when the account ID is not given' do
+        it 'Returns a Bad Request (400) response code when the username is not given' do
           expect(last_response.status).to be 400
         end
-        it 'Returns the correct body when the account ID is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.account_id'})
+        it 'Returns the correct body when the username is not given' do
+          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.username'})
         end
-        it 'Does not create an invitation when the account ID is not given' do
+        it 'Does not create an invitation when the username is not given' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
         end
       end
       describe 'The campaign is not given' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token}
         end
         it 'Returns a Bad Request (400) response code when the campaign ID is not given' do
           expect(last_response.status).to be 400
@@ -83,7 +83,7 @@ RSpec.describe Controllers::Invitations do
     describe 'Not found errors' do
       describe 'Campaign not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token, campaign_id: 'any_unknown_id'}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: 'any_unknown_id'}
         end
         it 'Returns a Not Found (404) response code when the campaign is not found' do
           expect(last_response.status).to be 404
@@ -97,7 +97,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'Account not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: 'any_unknown_id', session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: 'any_unknown_name', session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns a Not Found (404) response code when the account is not found' do
           expect(last_response.status).to be 404
@@ -111,7 +111,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'Session not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: 'any_unknown_token', campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: 'any_unknown_token', campaign_id: campaign.id.to_s}
         end
         it 'Returns a Not Found (404) response code when the session is not found' do
           expect(last_response.status).to be 404
@@ -131,7 +131,7 @@ RSpec.describe Controllers::Invitations do
         let!(:second_campaign) { create(:campaign, id: 'another_campaign_id', title: 'Another long title', creator: third_account) }
 
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token, campaign_id: second_campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: second_campaign.id.to_s}
         end
         it 'Returns a Forbidden (403) response code when the user creating the invitation is not the creator of the campaign' do
           expect(last_response.status).to be 403
@@ -148,7 +148,7 @@ RSpec.describe Controllers::Invitations do
     describe 'Unprocessable entity errors' do
       describe 'Creator and account are identical' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: creator.id.to_s, session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns an Unprocessable Entity (422) response code when the creator and the account are identical' do
           expect(last_response.status).to be 422
@@ -164,7 +164,7 @@ RSpec.describe Controllers::Invitations do
         let!(:invitation) { create(:invitation, accepted: false, account: account, creator: creator, campaign: campaign) }
 
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns an Unprocessable Entity (422) response code when the account already has a pending invitation' do
           expect(last_response.status).to be 422
@@ -180,7 +180,7 @@ RSpec.describe Controllers::Invitations do
         let!(:invitation) { create(:invitation, accepted: true, account: account, creator: creator, campaign: campaign) }
 
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', account_id: account.id.to_s, session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns an Unprocessable Entity (422) response code when the account already has an accepted invitation' do
           expect(last_response.status).to be 422
