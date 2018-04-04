@@ -89,7 +89,7 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the campaign is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'campaign_not_found'})
+          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.campaign.not_found']})
         end
         it 'Does not create an invitation when the campaign is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -103,7 +103,7 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the account is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'account_not_found'})
+          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_found']})
         end
         it 'Does not create an invitation when the account is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -117,7 +117,7 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the session is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'session_not_found'})
+          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.session.not_found']})
         end
         it 'Does not create an invitation when the session is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -137,7 +137,7 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 403
         end
         it 'Returns the correct body when the user creating the invitation did not create the campaign' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'not_authorized'})
+          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.session.not_authorized']})
         end
         it 'Does not create an invitation if the user creating it did not create the campaign' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -154,7 +154,7 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 422
         end
         it 'Returns the correct body when the creator and the account are identical' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.is_creator']})
+          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_creator']})
         end
         it 'Does not create an invitation when the account and the creator are identical' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
