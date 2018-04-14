@@ -25,7 +25,7 @@ RSpec.describe Controllers::Invitations do
         expect(last_response.status).to be 201
       end
       it 'Returns the correct body when the invitation is created' do
-        expect(JSON.parse(last_response.body)).to eq({'message' => 'created'})
+        expect(JSON.parse(last_response.body)).to include_json({'message' => 'created'})
       end
       it 'Creates the invitation when all parameters are correctly given' do
         expect(Arkaan::Campaigns::Invitation.all.count).to be 1
@@ -43,7 +43,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the session ID is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.session_id'})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'session_id',
+            'error' => 'required'
+          })
         end
         it 'Does not create an invitation when the session ID is not given' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -57,7 +61,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the username is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.username'})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'username',
+            'error' => 'required'
+          })
         end
         it 'Does not create an invitation when the username is not given' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -71,7 +79,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the campaignID is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.campaign_id'})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'campaign_id',
+            'error' => 'required'
+          })
         end
         it 'Does not create an invitation when the campaign ID is not given' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -88,7 +100,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the campaign is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.campaign.not_found']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 404,
+            'field' => 'campaign_id',
+            'error' => 'unknown'
+          })
         end
         it 'Does not create an invitation when the campaign is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -102,7 +118,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the account is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_found']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 404,
+            'field' => 'username',
+            'error' => 'unknown'
+          })
         end
         it 'Does not create an invitation when the account is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -116,7 +136,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body when the session is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.session.not_found']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 404,
+            'field' => 'session_id',
+            'error' => 'unknown'
+          })
         end
         it 'Does not create an invitation when the session is not found' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -136,7 +160,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 403
         end
         it 'Returns the correct body when the user creating the invitation did not create the campaign' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.session.not_authorized']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 403,
+            'field' => 'session_id',
+            'error' => 'forbidden'
+          })
         end
         it 'Does not create an invitation if the user creating it did not create the campaign' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -144,16 +172,20 @@ RSpec.describe Controllers::Invitations do
       end
     end
 
-    describe 'Unprocessable entity errors' do
+    describe 'Bad Request errors' do
       describe 'Creator and account are identical' do
         before do
           post '/', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
-        it 'Returns an Unprocessable Entity (422) response code when the creator and the account are identical' do
-          expect(last_response.status).to be 422
+        it 'Returns an Bad Request (400) response code when the creator and the account are identical' do
+          expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the creator and the account are identical' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_creator']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'username',
+            'error' => 'already_accepted'
+          })
         end
         it 'Does not create an invitation when the account and the creator are identical' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
@@ -165,11 +197,15 @@ RSpec.describe Controllers::Invitations do
         before do
           post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
-        it 'Returns an Unprocessable Entity (422) response code when the account already has a pending invitation' do
-          expect(last_response.status).to be 422
+        it 'Returns an Bad Request (400) response code when the account already has a pending invitation' do
+          expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the account already has a pending invitation' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.already_pending']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'username',
+            'error' => 'already_pending'
+          })
         end
         it 'Does not create an invitation if the account already has a pending invitation' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 1
@@ -181,11 +217,15 @@ RSpec.describe Controllers::Invitations do
         before do
           post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
-        it 'Returns an Unprocessable Entity (422) response code when the account already has an accepted invitation' do
-          expect(last_response.status).to be 422
+        it 'Returns an Bad Request (400) response code when the account already has an accepted invitation' do
+          expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the account already has an accepted invitation' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.already_accepted']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'username',
+            'error' => 'already_accepted'
+          })
         end
         it 'Does not create an invitation if the account already has an accepted invitation' do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 1
@@ -282,7 +322,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the session ID is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.session_id'})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'session_id',
+            'error' => 'required'
+          })
         end
       end
     end
@@ -300,7 +344,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 403
         end
         it 'Returns the correct body when the account accepting is not authorized to' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_authorized']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 403,
+            'field' => 'session_id',
+            'error' => 'forbidden'
+          })
         end
       end
     end
@@ -314,7 +362,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body if the invitation is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.id.not_found']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 404,
+            'field' => 'invitation_id',
+            'error' => 'unknown'
+          })
         end
       end
     end
@@ -389,7 +441,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 400
         end
         it 'Returns the correct body when the session ID is not given' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'missing.session_id'})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'session_id',
+            'error' => 'required'
+          })
         end
       end
     end
@@ -407,7 +463,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 403
         end
         it 'Returns the correct body when the account accepting is not authorized to' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.account.not_authorized']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 403,
+            'field' => 'session_id',
+            'error' => 'forbidden'
+          })
         end
       end
     end
@@ -421,7 +481,11 @@ RSpec.describe Controllers::Invitations do
           expect(last_response.status).to be 404
         end
         it 'Returns the correct body if the invitation is not found' do
-          expect(JSON.parse(last_response.body)).to eq({'errors' => ['invitation.id.not_found']})
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 404,
+            'field' => 'invitation_id',
+            'error' => 'unknown'
+          })
         end
       end
     end

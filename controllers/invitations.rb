@@ -1,35 +1,32 @@
 module Controllers
   class Invitations < Arkaan::Utils::Controller
+
+    load_errors_from __FILE__
+
     declare_route 'post', '/' do
-      check_presence('session_id', 'campaign_id', 'username')
+      check_presence('session_id', 'campaign_id', 'username', route: 'creation')
+
       account = Arkaan::Account.where(username: params['username']).first
-      if account.nil?
-        halt 404, {errors: ['invitation.account.not_found']}.to_json
-      end
+      custom_error(404, 'creation.username.unknown') if account.nil?
+
       campaign = Arkaan::Campaign.where(id: params['campaign_id']).first
-      if campaign.nil?
-        halt 404, {errors: ['invitation.campaign.not_found']}.to_json
-      end
+      custom_error(404, 'creation.campaign_id.unknown') if campaign.nil?
+
       session = Arkaan::Authentication::Session.where(token: params['session_id']).first
-      if session.nil?
-        halt 404, {errors: ['invitation.session.not_found']}.to_json
-      end
-      if session.account.id.to_s != campaign.creator.id.to_s
-        halt 403, {errors: ['invitation.session.not_authorized']}.to_json
-      end
-      if session.account.id.to_s == account.id.to_s
-        halt 422, {errors: ['invitation.account.not_creator']}.to_json
-      end
-      already_existing = Arkaan::Campaigns::Invitation.where(account: account, creator: session.account, campaign: campaign).first
-      if !already_existing.nil?
-        halt 422, {errors: ["invitation.account.already_#{already_existing.accepted ? 'accepted' : 'pending'}"]}.to_json
-      end
-      Arkaan::Campaigns::Invitation.create(account: account, creator: session.account, campaign: campaign, accepted: false)
-      halt 201, {message: 'created'}.to_json
+      custom_error(404, 'creation.session_id.unknown') if session.nil?
+      custom_error(403, 'creation.session_id.forbidden') if session.account.id != campaign.creator.id
+
+      custom_error(400, 'creation.username.already_accepted') if session.account.id.to_s == account.id.to_s
+
+      existing = Arkaan::Campaigns::Invitation.where(account: account, creator: session.account, campaign: campaign).first
+      custom_error(400, "creation.username.already_#{existing.accepted ? 'accepted' : 'pending'}") if !existing.nil?
+
+      invitation = Arkaan::Campaigns::Invitation.create(account: account, creator: session.account, campaign: campaign, accepted: false)
+      halt 201, {message: 'created', item: Decorators::Invitation.new(invitation).to_h}.to_json
     end
 
     declare_route 'put', '/:id' do
-      invitation = check_before_invitation_update
+      invitation = check_before_invitation_update('update')
       if params['accepted'] && params['accepted'] == 'true'
         invitation.accepted = true
         invitation.save
@@ -38,28 +35,26 @@ module Controllers
     end
 
     declare_route 'delete', '/:id' do
-      invitation = check_before_invitation_update(creator_allowed: true)
+      invitation = check_before_invitation_update('deletion')
       invitation.delete
       halt 200, {message: 'deleted'}.to_json
     end
 
-    def check_before_invitation_update(creator_allowed: false)
-      check_presence 'session_id'
+    def check_before_invitation_update(mode)
+      check_presence('session_id', route: mode)
       session = Arkaan::Authentication::Session.where(token: params['session_id']).first
-      if session.nil?
-        halt 404, {errors: ['invitation.session.not_found']}.to_json
-      end
+      custom_error(404, "#{mode}.session_id.unknown") if session.nil?
+
       invitation = Arkaan::Campaigns::Invitation.where(id: params['id']).first
-      if invitation.nil?
-        halt 404, {errors: ['invitation.id.not_found']}.to_json
-      end
-      if creator_allowed
+      custom_error(404, "#{mode}.invitation_id.unknown") if invitation.nil?
+
+      if mode == 'deletion'
         if ![invitation.account.id.to_s, invitation.creator.id.to_s].include?(session.account.id.to_s)
-          halt 403, {errors: ['invitation.account.not_authorized']}.to_json
+          custom_error(403, "#{mode}.session_id.forbidden")
         end
       else
         if invitation.account.id.to_s != session.account.id.to_s
-          halt 403, {errors: ['invitation.account.not_authorized']}.to_json
+          custom_error(403, "#{mode}.session_id.forbidden")
         end
       end
       return invitation
