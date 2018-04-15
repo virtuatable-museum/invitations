@@ -234,6 +234,102 @@ RSpec.describe Controllers::Invitations do
     end
   end
 
+  describe 'GET /own' do
+    let!(:session) { create(:session, account: account) }
+    let!(:a_invitation) { create(:accepted_invitation, account: account, creator: creator, campaign: campaign) }
+    let!(:other_campaign) { create(:campaign, id: 'another_campaign_id', title: 'another', creator: creator)}
+    let!(:p_invitation) { create(:pending_invitation, id: 'another_inv_id', account: account, creator: creator, campaign: other_campaign) }
+
+    describe 'Nominal case' do
+      before do
+        get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+      end
+      it 'Returns a OK (200) status)' do
+        expect(last_response.status).to be 200
+      end
+      it 'Returns the correct body' do
+        expect(JSON.parse(last_response.body)).to eq({
+          'accepted' => {
+            'count' => 1,
+            'items' => [
+              {
+                'id' => a_invitation.id.to_s,
+                'campaign' => {
+                  'id' => campaign.id.to_s,
+                  'title' => 'test_title',
+                  'description' => 'A longer description of the campaign',
+                  'creator' => {
+                    'id' => creator.id.to_s,
+                    'username' => 'Creator'
+                  },
+                  'is_private' => true,
+                  'tags' => ['test_tag']
+                }
+              }
+            ]
+          },
+          'pending' => {
+            'count' => 1,
+            'items' => [
+              {
+                'id' => p_invitation.id.to_s,
+                'campaign' => {
+                  'id' => other_campaign.id.to_s,
+                  'title' => 'another',
+                  'description' => 'A longer description of the campaign',
+                  'creator' => {
+                    'id' => creator.id.to_s,
+                    'username' => 'Creator'
+                  },
+                  'is_private' => true,
+                  'tags' => ['test_tag']
+                }
+              }
+            ]
+          }
+        })
+      end
+    end
+
+    it_should_behave_like 'a route', 'get', '/own'
+
+    describe '400 errors' do
+      describe 'session ID not given' do
+        before do
+          get '/own', {token: 'test_token', app_key: 'test_key'}
+        end
+        it 'Raises a Bad Request (400) error' do
+          expect(last_response.status).to be 400
+        end
+        it 'Returns the correct body' do
+          expect(last_response.body).to include_json({
+            'status' => 400,
+            'field' => 'session_id',
+            'error' => 'required'
+          })
+        end
+      end
+    end
+
+    describe '404 errors' do
+      describe 'session ID not found' do
+        before do
+          get '/own', {token: 'test_token', app_key: 'test_key', session_id: 'unknown_session_id'}
+        end
+        it 'Raises a Not Found (404)) error' do
+          expect(last_response.status).to be 404
+        end
+        it 'Returns the correct body' do
+          expect(last_response.body).to include_json({
+            'status' => 404,
+            'field' => 'session_id',
+            'error' => 'unknown'
+          })
+        end
+      end
+    end
+  end
+
   describe 'PUT /:id' do
     let!(:session) { create(:session, account: account) }
 

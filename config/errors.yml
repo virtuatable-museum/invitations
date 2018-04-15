@@ -27,6 +27,10 @@ errors:
       forbidden: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#not-authorized-update'
       required: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#session-id-not-given-1'
       unknwon: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#session-not-found-1'
+  own_invitations:
+    session_id:
+      required: ''
+      unknown: ''
   update:
     invitation_id:
       unknown: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#invitation-not-found'

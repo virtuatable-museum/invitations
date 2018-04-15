@@ -25,6 +25,22 @@ module Controllers
       halt 201, {message: 'created', item: Decorators::Invitation.new(invitation).to_h}.to_json
     end
 
+    declare_route 'get', '/own' do
+      check_presence('session_id', route: 'own_invitations')
+      session = Arkaan::Authentication::Session.where(token: params['session_id']).first
+      custom_error(404, 'creation.session_id.unknown') if session.nil?
+
+      pending = session.account.invitations.where(accepted: false)
+      dec_pending = Decorators::Invitation.decorate_collection(pending).map(&:with_campaign)
+      accepted = session.account.invitations.where(accepted: true)
+      dec_accepted = Decorators::Invitation.decorate_collection(accepted).map(&:with_campaign)
+
+      halt 200, {
+        pending: {count: pending.count, items: dec_pending},
+        accepted: {count: accepted.count, items: dec_accepted}
+      }.to_json
+    end
+
     declare_route 'put', '/:id' do
       invitation = check_before_invitation_update('update')
       if params['accepted'] && params['accepted'] == 'true'
