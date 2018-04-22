@@ -3,10 +3,10 @@ FactoryGirl.define do
     id 'invitation_id'
     factory :invitation do
       factory :pending_invitation do
-        accepted false
+        status :pending
       end
       factory :accepted_invitation do
-        accepted true
+        status :accepted
       end
     end
   end
