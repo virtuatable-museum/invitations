@@ -18,18 +18,7 @@ RSpec.describe Controllers::Invitations do
     let!(:session) { create(:session, account: creator) }
 
     describe 'Nominal case' do
-      before do
-        post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
-      end
-      it 'Returns a Created (201) response code when the invitation is correctly created' do
-        expect(last_response.status).to be 201
-      end
-      it 'Returns the correct body when the invitation is created' do
-        expect(JSON.parse(last_response.body)).to include_json({'message' => 'created'})
-      end
-      it 'Creates the invitation when all parameters are correctly given' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
-      end
+      include_examples 'Creation nominal case'
     end
 
     it_should_behave_like 'a route', 'post', '/'
