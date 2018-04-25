@@ -3,6 +3,10 @@ module Controllers
 
     load_errors_from __FILE__
 
+    configure do
+      set :show_exceptions, false
+    end
+
     declare_route 'post', '/' do
       check_presence('campaign_id', 'username', route: 'creation')
 
