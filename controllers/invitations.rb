@@ -8,15 +8,9 @@ module Controllers
     end
 
     declare_route 'post', '/' do
-      check_presence('campaign_id', 'username', route: 'creation')
-
       session = check_session('creation')
-
-      account = Arkaan::Account.where(username: params['username']).first
-      custom_error(404, 'creation.username.unknown') if account.nil?
-
-      campaign = Arkaan::Campaign.where(id: params['campaign_id']).first
-      custom_error(404, 'creation.campaign_id.unknown') if campaign.nil?
+      account = check_account('creation')
+      campaign = check_campaign('creation')
 
       invitation = Services::Invitations.instance.create(session, campaign, account)
 
@@ -48,6 +42,26 @@ module Controllers
   
       invitation.update_attributes(status: params['status'] || invitation.enum_status)
       halt 200, {message: 'updated'}.to_json
+    end
+
+    # Checks the presence of the username, and the existence of the associated account.
+    # @param action [String] the action used as a key in the configuration file to find the associated error.
+    # @return [Arkaan::Account] the account if it's been found and has not raised any error.
+    def check_account(action)
+      check_presence('username', route: action)
+      account = Arkaan::Account.where(username: params['username']).first
+      custom_error(404, "#{action}.username.unknown") if account.nil?
+      return account
+    end
+
+    # Checks the presence of the campaign ID, and the existence of the associated campaign.
+    # @param action [String] the action used as a key in the configuration file to find the associated error.
+    # @return [Arkaan::Campaign] the campaign if it's been found and has not raised any error.
+    def check_campaign(action)
+      check_presence('campaign_id', route: action)
+      campaign = Arkaan::Campaign.where(id: params['campaign_id']).first
+      custom_error(404, "#{action}.campaign_id.unknown") if campaign.nil?
+      return campaign
     end
 
   end
