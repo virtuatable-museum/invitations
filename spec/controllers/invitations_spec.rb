@@ -78,6 +78,24 @@ RSpec.describe Controllers::Invitations do
           expect(Arkaan::Campaigns::Invitation.all.count).to be 0
         end
       end
+      describe 'Creator and account are identical' do
+        before do
+          post '/', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
+        end
+        it 'Returns an Bad Request (400) response code when the creator and the account are identical' do
+          expect(last_response.status).to be 400
+        end
+        it 'Returns the correct body when the creator and the account are identical' do
+          expect(JSON.parse(last_response.body)).to include_json({
+            'status' => 400,
+            'field' => 'username',
+            'error' => 'already_accepted'
+          })
+        end
+        it 'Does not create an invitation when the account and the creator are identical' do
+          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+        end
+      end
     end
 
     describe 'Not found errors' do
@@ -136,98 +154,13 @@ RSpec.describe Controllers::Invitations do
         end
       end
     end
-
-    describe 'Forbidden errors' do
-      describe 'When the user trying to create the invitation is not the creator of the campaign' do
-        let!(:third_account) { create(:account, username: 'Third account', email: 'third@email.com') }
-        let!(:second_campaign) { create(:campaign, id: 'another_campaign_id', title: 'Another long title', creator: third_account) }
-
-        before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: second_campaign.id.to_s}
-        end
-        it 'Returns a Forbidden (403) response code when the user creating the invitation is not the creator of the campaign' do
-          expect(last_response.status).to be 403
-        end
-        it 'Returns the correct body when the user creating the invitation did not create the campaign' do
-          expect(JSON.parse(last_response.body)).to include_json({
-            'status' => 403,
-            'field' => 'session_id',
-            'error' => 'forbidden'
-          })
-        end
-        it 'Does not create an invitation if the user creating it did not create the campaign' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
-        end
-      end
-    end
-
-    describe 'Bad Request errors' do
-      describe 'Creator and account are identical' do
-        before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
-        end
-        it 'Returns an Bad Request (400) response code when the creator and the account are identical' do
-          expect(last_response.status).to be 400
-        end
-        it 'Returns the correct body when the creator and the account are identical' do
-          expect(JSON.parse(last_response.body)).to include_json({
-            'status' => 400,
-            'field' => 'username',
-            'error' => 'already_accepted'
-          })
-        end
-        it 'Does not create an invitation when the account and the creator are identical' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
-        end
-      end
-      describe 'The user is already existing in the campaign as a pending invitation' do
-        let!(:invitation) { create(:invitation, status: 'pending', account: account, creator: creator, campaign: campaign) }
-
-        before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
-        end
-        it 'Returns an Bad Request (400) response code when the account already has a pending invitation' do
-          expect(last_response.status).to be 400
-        end
-        it 'Returns the correct body when the account already has a pending invitation' do
-          expect(JSON.parse(last_response.body)).to include_json({
-            'status' => 400,
-            'field' => 'username',
-            'error' => 'already_pending'
-          })
-        end
-        it 'Does not create an invitation if the account already has a pending invitation' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 1
-        end
-      end
-      describe 'The user is already existing in the campaign as an accepted invitation' do
-        let!(:invitation) { create(:invitation, status: 'accepted', account: account, creator: creator, campaign: campaign) }
-
-        before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: campaign.id.to_s}
-        end
-        it 'Returns an Bad Request (400) response code when the account already has an accepted invitation' do
-          expect(last_response.status).to be 400
-        end
-        it 'Returns the correct body when the account already has an accepted invitation' do
-          expect(JSON.parse(last_response.body)).to include_json({
-            'status' => 400,
-            'field' => 'username',
-            'error' => 'already_accepted'
-          })
-        end
-        it 'Does not create an invitation if the account already has an accepted invitation' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 1
-        end
-      end
-    end
   end
 
   describe 'GET /own' do
     let!(:session) { create(:session, account: account) }
-    let!(:a_invitation) { create(:accepted_invitation, account: account, creator: creator, campaign: campaign) }
+    let!(:a_invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
     let!(:other_campaign) { create(:campaign, id: 'another_campaign_id', title: 'another', creator: creator)}
-    let!(:p_invitation) { create(:pending_invitation, id: 'another_inv_id', account: account, creator: creator, campaign: other_campaign) }
+    let!(:p_invitation) { create(:pending_invitation, id: 'another_inv_id', account: account, campaign: other_campaign) }
 
     describe 'Nominal case' do
       before do
@@ -324,7 +257,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Nominal case' do
       describe 'when the invitation was pending' do
-        let!(:invitation) { create(:pending_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
@@ -343,7 +276,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Alternative cases' do
       describe 'when the invitation was already accepted' do
-        let!(:invitation) { create(:accepted_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
@@ -360,7 +293,7 @@ RSpec.describe Controllers::Invitations do
       end
 
       describe 'when the accepted flag is not passed and the invitation was pending' do
-        let!(:invitation) { create(:pending_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
@@ -377,7 +310,7 @@ RSpec.describe Controllers::Invitations do
       end
 
       describe 'when the accepted flag is not passed and the invitation was accepted' do
-        let!(:invitation) { create(:accepted_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
@@ -398,7 +331,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Bad Request errors' do
       describe 'session_id not given error' do
-        let!(:invitation) { create(:pending_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted'}
@@ -420,7 +353,7 @@ RSpec.describe Controllers::Invitations do
       describe 'error when the user accepting the invitation is not the one it was issued to' do
         let!(:other_account) { create(:account, username: 'Babaussine', email: 'babaussine@gmail.com', id: 'another_id') }
         let!(:other_session) { create(:session, account: other_account, token: 'another_token') }
-        let!(:invitation) { create(:pending_invitation, account: account, creator: creator, campaign: campaign) }
+        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
           put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: other_session.token}
