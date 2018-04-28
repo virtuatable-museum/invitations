@@ -256,75 +256,7 @@ RSpec.describe Controllers::Invitations do
     let!(:session) { create(:session, account: account) }
 
     describe 'Nominal case' do
-      describe 'when the invitation was pending' do
-        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
-
-        before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
-        end
-        it 'Returns a OK (200) response code when the invitation was pending and is correctly accepted' do
-          expect(last_response.status).to be 200
-        end
-        it 'Returns the correct body when the invitation is accepted' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'updated'})
-        end
-        it 'has correctly edited the invitation' do
-          expect(Arkaan::Campaigns::Invitation.first.status).to eq :accepted
-        end
-      end
-    end
-
-    describe 'Alternative cases' do
-      describe 'when the invitation was already accepted' do
-        let!(:invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
-
-        before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
-        end
-        it 'Returns a OK (200) response code when the invitation was already accepted' do
-          expect(last_response.status).to be 200
-        end
-        it 'Returns the correct body when the invitation was already accepted' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'updated'})
-        end
-        it 'has not edited the invitation' do
-          expect(Arkaan::Campaigns::Invitation.first.status).to eq :accepted
-        end
-      end
-
-      describe 'when the accepted flag is not passed and the invitation was pending' do
-        let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
-
-        before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
-        end
-        it 'Returns a OK (200) response code when the invitation was already accepted' do
-          expect(last_response.status).to be 200
-        end
-        it 'Returns the correct body when the invitation was already accepted' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'updated'})
-        end
-        it 'has not edited the invitation' do
-          expect(Arkaan::Campaigns::Invitation.first.status).to eq :pending
-        end
-      end
-
-      describe 'when the accepted flag is not passed and the invitation was accepted' do
-        let!(:invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
-
-        before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
-        end
-        it 'Returns a OK (200) response code when the invitation was already accepted' do
-          expect(last_response.status).to be 200
-        end
-        it 'Returns the correct body when the invitation was already accepted' do
-          expect(JSON.parse(last_response.body)).to eq({'message' => 'updated'})
-        end
-        it 'has not edited the invitation' do
-          expect(Arkaan::Campaigns::Invitation.first.status).to eq :accepted
-        end
-      end
+      include_examples 'Update nominal case'
     end
 
     it_should_behave_like 'a route', 'put', '/invitation_id'
@@ -347,25 +279,20 @@ RSpec.describe Controllers::Invitations do
           })
         end
       end
-    end
-
-    describe 'Forbidden errors' do
-      describe 'error when the user accepting the invitation is not the one it was issued to' do
-        let!(:other_account) { create(:account, username: 'Babaussine', email: 'babaussine@gmail.com', id: 'another_id') }
-        let!(:other_session) { create(:session, account: other_account, token: 'another_token') }
+      describe 'status not given error' do
         let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: other_session.token}
+          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
         end
-        it 'Returns a Forbidden (403) response code when the account accepting the invitation is not authorized to' do
-          expect(last_response.status).to be 403
+        it 'Returns a Bad Request (400) when the session ID is not given' do
+          expect(last_response.status).to be 400
         end
-        it 'Returns the correct body when the account accepting is not authorized to' do
+        it 'Returns the correct body when the session ID is not given' do
           expect(JSON.parse(last_response.body)).to include_json({
-            'status' => 403,
-            'field' => 'session_id',
-            'error' => 'forbidden'
+            'status' => 400,
+            'field' => 'status',
+            'error' => 'required'
           })
         end
       end

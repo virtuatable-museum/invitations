@@ -1,0 +1,11 @@
+accepted:
+  left: 'user'
+  expelled: 'creator'
+pending:
+  accepted: 'user'
+  ignored: 'user'
+  refused: 'user'
+request:
+  accepted: 'creator'
+  blocked: 'creator'
+  refused: 'creator'

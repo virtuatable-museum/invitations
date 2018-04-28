@@ -3,6 +3,8 @@ module Controllers
 
     load_errors_from __FILE__
 
+    Services::Invitations.instance.load_rules!
+
     configure do
       set :show_exceptions, false
     end
@@ -34,13 +36,13 @@ module Controllers
 
     declare_route 'put', '/:id' do
       session = check_session('update')
+      check_presence('status', route: 'update')
 
       invitation = Arkaan::Campaigns::Invitation.where(id: params['id']).first
       custom_error(404, "update.invitation_id.unknown") if invitation.nil?
-
-      custom_error(403, "update.session_id.forbidden") if invitation.account.id.to_s != session.account.id.to_s
   
-      invitation.update_attributes(status: params['status'] || invitation.enum_status)
+      invitation = Services::Invitations.instance.update(session, invitation, params['status'])
+
       halt 200, {message: 'updated'}.to_json
     end
 

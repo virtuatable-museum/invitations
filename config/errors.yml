@@ -38,3 +38,7 @@ errors:
       forbidden: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#not-authorized-update'
       required: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#session-id-not-given-1'
       unknwon: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#session-not-found-1'
+    status:
+      impossible: ''
+      required: ''
+      use_creation: ''
