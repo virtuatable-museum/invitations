@@ -1,8 +1,8 @@
-RSpec.shared_examples 'from pending to pending' do
-  describe 'Update from pending to pending' do
+RSpec.shared_examples 'from expelled to expelled' do
+  describe 'Update from expelled to expelled' do
     describe 'update by the user' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
+        put "/#{expelled_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -11,12 +11,12 @@ RSpec.shared_examples 'from pending to pending' do
         expect(last_response.body).to include_json({message: 'updated'})
       end
       it 'Has not updated the invitation' do
-        expect(pending_invitation.reload.status_pending?).to be true
+        expect(expelled_invitation.reload.status_expelled?).to be true
       end
     end
     describe 'update by the creator' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
+        put "/#{expelled_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -25,7 +25,7 @@ RSpec.shared_examples 'from pending to pending' do
         expect(last_response.body).to include_json({message: 'updated'})
       end
       it 'Has not updated the invitation' do
-        expect(pending_invitation.reload.status_pending?).to be true
+        expect(expelled_invitation.reload.status_expelled?).to be true
       end
     end
   end

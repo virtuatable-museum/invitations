@@ -1,8 +1,8 @@
-RSpec.shared_examples 'from pending to refused' do
-  describe 'Update from pending to refused' do
+RSpec.shared_examples 'from accepted to left' do
+  describe 'Update from accepted to left' do
     describe 'update by the user' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'refused'}
+        put "/#{accepted_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -11,12 +11,12 @@ RSpec.shared_examples 'from pending to refused' do
         expect(last_response.body).to include_json({message: 'updated'})
       end
       it 'Has updated the invitation' do
-        expect(pending_invitation.reload.status_refused?).to be true
+        expect(accepted_invitation.reload.status_left?).to be true
       end
     end
     describe 'update by the creator' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'refused'}
+        put "/#{accepted_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
       end
       it 'Returns a Forbidden (403) status' do
         expect(last_response.status).to be 403
@@ -29,7 +29,7 @@ RSpec.shared_examples 'from pending to refused' do
         })
       end
       it 'Has not updated the invitation' do
-        expect(pending_invitation.reload.status_pending?).to be true
+        expect(accepted_invitation.reload.status_accepted?).to be true
       end
     end
   end

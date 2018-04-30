@@ -11,7 +11,7 @@ RSpec.shared_examples 'from pending to ignored' do
         expect(last_response.body).to include_json({message: 'updated'})
       end
       it 'Has updated the invitation' do
-        expect(Arkaan::Campaigns::Invitation.first.status_ignored?).to be true
+        expect(pending_invitation.reload.status_ignored?).to be true
       end
     end
     describe 'update by the creator' do
@@ -29,7 +29,7 @@ RSpec.shared_examples 'from pending to ignored' do
         })
       end
       it 'Has not updated the invitation' do
-        expect(Arkaan::Campaigns::Invitation.first.status_pending?).to be true
+        expect(pending_invitation.reload.status_pending?).to be true
       end
     end
   end
