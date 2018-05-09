@@ -8,6 +8,9 @@ FactoryGirl.define do
       factory :accepted_invitation do
         status :accepted
       end
+      factory :request_invitation do
+        status :request
+      end
     end
   end
 end

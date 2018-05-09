@@ -21,15 +21,7 @@ module Controllers
 
     declare_route 'get', '/own' do
       session = check_session('own_invitations')
-      results = {}
-
-      [:accepted, :pending].each do |status|
-        items = session.account.invitations.where(enum_status: status)
-        results[status] = {
-          count: items.count,
-          items: Decorators::Invitation.decorate_collection(items).map(&:with_campaign)
-        }
-      end
+      results = Services::Invitations.instance.list(session)
 
       halt 200, results.to_json
     end

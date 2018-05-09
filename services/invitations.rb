@@ -73,5 +73,29 @@ module Services
       return invitation
     end
 
+    # Gets the list of invitations concerning the given session. Selected invitations are :
+    # - Any invitations where the account is the session's account
+    # - Any request made to a campaign that was created by the session's account
+    # @param session [Arkaan::Authentication::Session] the session the user is connected on.
+    # @return [Hash<String, Array<Arkaan::Campaigns::Invitation>>] the invitations grouped by status.
+    def list(session)
+      # require 'pry'; binding.pry
+      raw_invitations = Arkaan::Campaigns::Invitation.where(account: session.account).group_by { |e| e.status.to_s }
+      arr_invitations = raw_invitations.map { |status, invitations|
+        mapped_invitations = Decorators::Invitation.decorate_collection(invitations).map(&:with_campaign)
+        [status, {count: invitations.count, items: mapped_invitations}]
+      }
+      invitations = Hash[arr_invitations]
+      campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
+      requests = Arkaan::Campaigns::Invitation.where(:campaign_id.in => campaign_ids)
+      if requests.count > 0
+        invitations['request'] = {
+          count: requests.count,
+          items: Decorators::Invitation.decorate_collection(requests).map(&:with_campaign)
+        }
+      end
+      return invitations
+    end
+
   end
 end

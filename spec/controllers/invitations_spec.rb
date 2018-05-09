@@ -165,6 +165,8 @@ RSpec.describe Controllers::Invitations do
     let!(:a_invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
     let!(:other_campaign) { create(:campaign, id: 'another_campaign_id', title: 'another', creator: creator)}
     let!(:p_invitation) { create(:pending_invitation, id: 'another_inv_id', account: account, campaign: other_campaign) }
+    let!(:account_campaign) { create(:campaign, id: 'account_campaign_id', title: 'account campaign', creator: account, is_private: false) }
+    let!(:r_invitation) { create(:request_invitation, id: 'request_id', campaign: account_campaign, account: creator) }
 
     describe 'Nominal case' do
       before do
@@ -174,7 +176,7 @@ RSpec.describe Controllers::Invitations do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(JSON.parse(last_response.body)).to eq({
+        expect(JSON.parse(last_response.body)).to include_json({
           'accepted' => {
             'count' => 1,
             'items' => [
@@ -208,6 +210,26 @@ RSpec.describe Controllers::Invitations do
                     'username' => 'Creator'
                   },
                   'is_private' => true,
+                  'tags' => ['test_tag']
+
+                }
+              }
+            ]
+          },
+          'request' => {
+            'count' => 1,
+            'items' => [
+              {
+                'id' => r_invitation.id.to_s,
+                'campaign' => {
+                  'id' => account_campaign.id.to_s,
+                  'title' => 'account campaign',
+                  'description' => 'A longer description of the campaign',
+                  'creator' => {
+                    'id' => account.id.to_s,
+                    'username' => account.username
+                  },
+                  'is_private' => false,
                   'tags' => ['test_tag']
                 }
               }
