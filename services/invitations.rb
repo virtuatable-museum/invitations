@@ -87,7 +87,7 @@ module Services
       }
       invitations = Hash[arr_invitations]
       campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
-      requests = Arkaan::Campaigns::Invitation.where(:campaign_id.in => campaign_ids)
+      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request, :campaign_id.in => campaign_ids)
       if requests.count > 0
         invitations['request'] = {
           count: requests.count,
