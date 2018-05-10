@@ -14,16 +14,23 @@ module Decorators
     def with_campaign
       return {
         id: object.id.to_s,
+        created_at: object.created_at.utc.iso8601,
         campaign: {
           id: object.campaign.id.to_s,
           title: object.campaign.title,
-          description: object.campaign.description,
-          creator: {
-            id: object.campaign.creator.id.to_s,
-            username: object.campaign.creator.username
-          },
-          is_private: object.campaign.is_private,
-          tags: object.campaign.tags
+          creator: object.campaign.creator.username
+        }
+      }
+    end
+
+    def as_request
+      return {
+        id: object.id.to_s,
+        created_at: object.created_at.utc.iso8601,
+        username: object.account.username,
+        campaign: {
+          id: object.campaign.id.to_s,
+          title: object.campaign.title,
         }
       }
     end

@@ -77,25 +77,37 @@ module Services
     # - Any invitations where the account is the session's account
     # - Any request made to a campaign that was created by the session's account
     # @param session [Arkaan::Authentication::Session] the session the user is connected on.
-    # @return [Hash<String, Array<Arkaan::Campaigns::Invitation>>] the invitations grouped by status.
+    # @return [Hash<Symbol, Array<Arkaan::Campaigns::Invitation>>] the invitations grouped by status.
     def list(session)
-      # require 'pry'; binding.pry
-      raw_invitations = Arkaan::Campaigns::Invitation.where(account: session.account).group_by { |e| e.status.to_s }
-      arr_invitations = raw_invitations.map { |status, invitations|
-        mapped_invitations = Decorators::Invitation.decorate_collection(invitations).map(&:with_campaign)
-        [status, {count: invitations.count, items: mapped_invitations}]
+      return {
+        accepted: get_invitations(:accepted, session),
+        pending: get_invitations(:pending, session),
+        request: get_requests(session)
       }
-      invitations = Hash[arr_invitations]
-      campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
-      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request, :campaign_id.in => campaign_ids)
-      if requests.count > 0
-        invitations['request'] = {
-          count: requests.count,
-          items: Decorators::Invitation.decorate_collection(requests).map(&:with_campaign)
-        }
-      end
-      return invitations
     end
 
+    # Gets the invitations for the given session, with the given status, and decorates it with campaigns.
+    # @param status [Symbol, String] the status you want to select the invitations on.
+    # @param session [Arkaan::Authentication::Session] the session of the account you want the invitations from.
+    # @return [Hash] a hash with the count and items for this status and account.
+    def get_invitations(status, session)
+      invitations = Arkaan::Campaigns::Invitation.where(enum_status: status, account: session.account)
+      return {
+        count: invitations.count,
+        items: Decorators::Invitation.decorate_collection(invitations).map(&:with_campaign)
+      }
+    end
+
+    # Get all the requests in the campaign created by the account linked to the given session.
+    # @param session [Arkaan::Authentication::Session] the session of the account you want the requests from.
+    # @return [Hash] a hash with the count and items for the desired requests.
+    def get_requests(session)
+      campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
+      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request, :campaign_id.in => campaign_ids)
+      return {
+        count: requests.count,
+        items: Decorators::Invitation.decorate_collection(requests).map(&:as_request)
+      }
+    end
   end
 end

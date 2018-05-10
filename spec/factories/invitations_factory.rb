@@ -1,15 +1,13 @@
 FactoryGirl.define do
   factory :empty_invitation, class: Arkaan::Campaigns::Invitation do
-    id 'invitation_id'
+    
     factory :invitation do
-      factory :pending_invitation do
-        status :pending
-      end
-      factory :accepted_invitation do
-        status :accepted
-      end
-      factory :request_invitation do
-        status :request
+      id 'invitation_id'
+
+      [:accepted, :pending, :refused, :request, :left, :expelled, :blocked, :ignored].each do |tmp_status|
+        factory :"#{tmp_status.to_s}_invitation" do
+          status tmp_status
+        end
       end
     end
   end

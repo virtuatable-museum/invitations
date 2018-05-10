@@ -22,4 +22,5 @@ group :development, :test do
   gem 'database_cleaner'       , '1.6.1'
   gem 'bcrypt'                 , '3.1.11'
   gem 'rubocop'
+  gem 'faker'                  , '1.8.7'
 end

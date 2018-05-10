@@ -7,5 +7,14 @@ FactoryGirl.define do
       is_private true
       tags ['test_tag']
     end
+
+    factory :random_campaign do
+      title Faker::StarWars.wookiee_sentence
+      description Faker::Simpsons.quote
+
+      factory :public_campaign do
+        is_private false
+      end
+    end
   end
 end

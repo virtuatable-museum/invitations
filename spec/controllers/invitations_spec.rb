@@ -161,81 +161,330 @@ RSpec.describe Controllers::Invitations do
   end
 
   describe 'GET /own' do
-    let!(:session) { create(:session, account: account) }
-    let!(:a_invitation) { create(:accepted_invitation, account: account, campaign: campaign) }
-    let!(:other_campaign) { create(:campaign, id: 'another_campaign_id', title: 'another', creator: creator)}
-    let!(:p_invitation) { create(:pending_invitation, id: 'another_inv_id', account: account, campaign: other_campaign) }
-    let!(:account_campaign) { create(:campaign, id: 'account_campaign_id', title: 'account campaign', creator: account, is_private: false) }
-    let!(:r_invitation) { create(:request_invitation, id: 'request_id', campaign: account_campaign, account: creator) }
 
-    describe 'Nominal case' do
-      before do
-        get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
-      end
-      it 'Returns a OK (200) status)' do
-        expect(last_response.status).to be 200
-      end
-      it 'Returns the correct body' do
-        expect(JSON.parse(last_response.body)).to include_json({
-          'accepted' => {
-            'count' => 1,
-            'items' => [
-              {
-                'id' => a_invitation.id.to_s,
-                'campaign' => {
-                  'id' => campaign.id.to_s,
-                  'title' => 'test_title',
-                  'description' => 'A longer description of the campaign',
-                  'creator' => {
-                    'id' => creator.id.to_s,
-                    'username' => 'Creator'
-                  },
-                  'is_private' => true,
-                  'tags' => ['test_tag']
-                }
-              }
-            ]
-          },
-          'pending' => {
-            'count' => 1,
-            'items' => [
-              {
-                'id' => p_invitation.id.to_s,
-                'campaign' => {
-                  'id' => other_campaign.id.to_s,
-                  'title' => 'another',
-                  'description' => 'A longer description of the campaign',
-                  'creator' => {
-                    'id' => creator.id.to_s,
-                    'username' => 'Creator'
-                  },
-                  'is_private' => true,
-                  'tags' => ['test_tag']
+    let!(:other_account) { create(:random_account) }
+    let!(:acc_campaign) { create(:random_campaign, creator: account) }
+    let!(:session) { create(:random_session, account: account) }
+    let!(:other_session) { create(:random_session, account: other_account) }
 
-                }
+    describe 'Nominal cases' do
+      describe 'With a pending invitation from a user to another' do
+        let!(:invitation) { create(:pending_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {
+                'count' => 1,
+                'items' => [
+                  {
+                    'id' => invitation.id.to_s,
+                    'created_at' => invitation.created_at.utc.iso8601,
+                    'campaign' => {
+                      'id' => acc_campaign.id.to_s,
+                      'title' => acc_campaign.title,
+                      'creator' => account.username
+                    }
+                  }
+                ]
+              },
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With an accepted invitation from a user to another' do
+        let!(:invitation) { create(:accepted_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {
+                'count' => 1,
+                'items' => [
+                  {
+                    'id' => invitation.id.to_s,
+                    'created_at' => invitation.created_at.utc.iso8601,
+                    'campaign' => {
+                      'id' => acc_campaign.id.to_s,
+                      'title' => acc_campaign.title,
+                      'creator' => account.username
+                    }
+                  }
+                ]
+              },
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With a request invitation from a user to another' do
+        let!(:invitation) { create(:request_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the requesting account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {
+                'count' => 1,
+                'items' => [
+                  {
+                    'id' => invitation.id.to_s,
+                    'created_at' => invitation.created_at.utc.iso8601,
+                    'username' => other_account.username,
+                    'campaign' => {
+                      'id' => acc_campaign.id.to_s,
+                      'title' => acc_campaign.title
+                    }
+                  }
+                ]
               }
-            ]
-          },
-          'request' => {
-            'count' => 1,
-            'items' => [
-              {
-                'id' => r_invitation.id.to_s,
-                'campaign' => {
-                  'id' => account_campaign.id.to_s,
-                  'title' => 'account campaign',
-                  'description' => 'A longer description of the campaign',
-                  'creator' => {
-                    'id' => account.id.to_s,
-                    'username' => account.username
-                  },
-                  'is_private' => false,
-                  'tags' => ['test_tag']
-                }
-              }
-            ]
-          }
-        })
+            })
+          end
+        end
+      end
+
+      describe 'With a refused invitation from a user to another' do
+        let!(:invitation) { create(:refused_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With an ignored invitation from a user to another' do
+        let!(:invitation) { create(:ignored_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With a blocked invitation from a user to another' do
+        let!(:invitation) { create(:blocked_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With an expelled invitation from a user to another' do
+        let!(:invitation) { create(:expelled_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+      end
+
+      describe 'With a left invitation from a user to another' do
+        let!(:invitation) { create(:left_invitation, campaign: acc_campaign, account: other_account) }
+
+        describe 'With the invited account session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
+        describe 'With the campaign creator session' do
+          before do
+            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          end
+          it 'Returns a OK (200) status' do
+            expect(last_response.status).to be 200
+          end
+          it 'Returns the correct body' do
+            expect(JSON.parse(last_response.body)).to eq({
+              'accepted' => {'count' => 0, 'items' => []},
+              'pending' => {'count' => 0, 'items' => []},
+              'request' => {'count' => 0, 'items' => []}
+            })
+          end
+        end
       end
     end
 
