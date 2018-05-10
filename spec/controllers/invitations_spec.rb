@@ -190,7 +190,10 @@ RSpec.describe Controllers::Invitations do
                     'campaign' => {
                       'id' => acc_campaign.id.to_s,
                       'title' => acc_campaign.title,
-                      'creator' => account.username
+                      'description' => acc_campaign.description,
+                      'creator' => account.username,
+                      'tags' => [],
+                      'is_private' => true
                     }
                   }
                 ]
@@ -237,7 +240,10 @@ RSpec.describe Controllers::Invitations do
                     'campaign' => {
                       'id' => acc_campaign.id.to_s,
                       'title' => acc_campaign.title,
-                      'creator' => account.username
+                      'description' => acc_campaign.description,
+                      'creator' => account.username,
+                      'tags' => [],
+                      'is_private' => true
                     }
                   }
                 ]
