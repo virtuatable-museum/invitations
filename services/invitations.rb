@@ -103,7 +103,9 @@ module Services
     # @return [Hash] a hash with the count and items for the desired requests.
     def get_requests(session)
       campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
-      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request, :campaign_id.in => campaign_ids)
+      in_own_campaign = 
+
+      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request).any_of({:campaign_id.in => campaign_ids}, {account: session.account})
       return {
         count: requests.count,
         items: Decorators::Invitation.decorate_collection(requests).map(&:as_request)

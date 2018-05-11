@@ -284,7 +284,20 @@ RSpec.describe Controllers::Invitations do
             expect(JSON.parse(last_response.body)).to eq({
               'accepted' => {'count' => 0, 'items' => []},
               'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
+              'request' => {
+                'count' => 1,
+                'items' => [
+                  {
+                    'id' => invitation.id.to_s,
+                    'created_at' => invitation.created_at.utc.iso8601,
+                    'username' => other_account.username,
+                    'campaign' => {
+                      'id' => acc_campaign.id.to_s,
+                      'title' => acc_campaign.title
+                    }
+                  }
+                ]
+              }
             })
           end
         end
