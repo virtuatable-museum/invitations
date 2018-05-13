@@ -48,9 +48,9 @@ module Services
       if !invitation.status_pending? && !invitation.status_request?
         raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
       elsif invitation.status_pending? && session.account.id.to_s != invitation.campaign.creator.id.to_s
-        raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
+        raise Arkaan::Utils::Errors::Forbidden.new(action: 'deletion', field: 'session_id', error: "forbidden")
       elsif invitation.status_request? && session.account.id.to_s != invitation.account.id.to_s
-        raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
+        raise Arkaan::Utils::Errors::Forbidden.new(action: 'deletion', field: 'session_id', error: "forbidden")
       end
       return invitation.delete
     end

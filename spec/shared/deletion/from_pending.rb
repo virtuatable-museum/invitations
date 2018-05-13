@@ -6,14 +6,14 @@ RSpec.shared_examples 'delete pending invitation' do
       before do
         delete "/#{existing_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token'}
       end
-      it 'Returns a Bad Request (400) status' do
-        expect(last_response.status).to be 400
+      it 'Returns a Forbidden (403) status' do
+        expect(last_response.status).to be 403
       end
       it 'Returns the correct body' do
         expect(last_response.body).to include_json({
-          status: 400,
-          field: 'invitation_id',
-          error: 'impossible_deletion'
+          status: 403,
+          field: 'session_id',
+          error: 'forbidden'
         })
       end
       it 'Does not create the invitation' do
