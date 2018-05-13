@@ -44,6 +44,17 @@ module Services
       end
     end
 
+    def delete(session, invitation)
+      if !invitation.status_pending? && !invitation.status_request?
+        raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
+      elsif invitation.status_pending? && session.account.id.to_s != invitation.campaign.creator.id.to_s
+        raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
+      elsif invitation.status_request? && session.account.id.to_s != invitation.account.id.to_s
+        raise Arkaan::Utils::Errors::BadRequest.new(action: 'deletion', field: 'invitation_id', error: "impossible_deletion")
+      end
+      return invitation.delete
+    end
+
     # Updates the invitation with the given status.
     # @param session [Arkaan::Authentication::Session] the session of the user trying to update the invitation.
     # @param invitation [Arkaan::Campaigns::Invitation] the invitation to update

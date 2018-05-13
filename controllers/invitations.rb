@@ -27,15 +27,23 @@ module Controllers
     end
 
     declare_route 'put', '/:id' do
-      session = check_session('update')
       check_presence('status', route: 'update')
 
-      invitation = Arkaan::Campaigns::Invitation.where(id: params['id']).first
-      custom_error(404, "update.invitation_id.unknown") if invitation.nil?
+      session = check_session('update')
+      invitation = check_invitation('update')
   
-      invitation = Services::Invitations.instance.update(session, invitation, params['status'])
+      Services::Invitations.instance.update(session, invitation, params['status'])
 
       halt 200, {message: 'updated'}.to_json
+    end
+
+    declare_route 'delete', '/:id' do
+      session = check_session('deletion')
+      invitation = check_invitation('update')
+
+      Services::Invitations.instance.delete(session, invitation)
+
+      halt 200, {message: 'deleted'}.to_json
     end
 
     # Checks the presence of the username, and the existence of the associated account.
@@ -46,6 +54,12 @@ module Controllers
       account = Arkaan::Account.where(username: params['username']).first
       custom_error(404, "#{action}.username.unknown") if account.nil?
       return account
+    end
+
+    def check_invitation(action)
+      invitation = Arkaan::Campaigns::Invitation.where(id: params['id']).first
+      custom_error(404, "#{action}.invitation_id.unknown") if invitation.nil?
+      return invitation
     end
 
     # Checks the presence of the campaign ID, and the existence of the associated campaign.

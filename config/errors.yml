@@ -23,6 +23,7 @@ errors:
   deletion:
     invitation_id:
       unknown: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#invitation-not-found'
+      impossible_deletion: ''
     session_id:
       forbidden: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#not-authorized-update'
       required: 'https://github.com/jdr-tools/wiki/wiki/Invitations-API#session-id-not-given-1'
