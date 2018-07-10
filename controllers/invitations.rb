@@ -9,6 +9,10 @@ module Controllers
       set :show_exceptions, false
     end
 
+    def initialize
+      create_app
+    end
+
     declare_route 'post', '/' do
       session = check_session('creation')
       account = check_account('creation')
@@ -70,6 +74,13 @@ module Controllers
       campaign = Arkaan::Campaign.where(id: params['campaign_id']).first
       custom_error(404, "#{action}.campaign_id.unknown") if campaign.nil?
       return campaign
+    end
+
+    def create_app
+      account = Arkaan::Account.where(username: ENV['USERNAME']).first
+      application = Arkaan::OAuth::Application.find_or_create_by(name: 'invitations', premium: true, creator: account)
+      application.save
+      @oauth_app = application
     end
 
   end
