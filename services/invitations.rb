@@ -21,27 +21,35 @@ module Services
       if account.id.to_s == campaign.creator.id.to_s
         raise Arkaan::Utils::Errors::BadRequest.new(action: 'creation', field: 'username', error: 'already_accepted')
       end
-      existing = Arkaan::Campaigns::Invitation.where(campaign: campaign, account: account).first
+      invitation = Arkaan::Campaigns::Invitation.where(campaign: campaign, account: account).first
       status = session.account.id.to_s == campaign.creator.id.to_s ? :pending : :request
 
-      if existing.nil?
+      if invitation.nil?
         parameters = {account: account, campaign: campaign, enum_status: status}
-        return Arkaan::Campaigns::Invitation.create(parameters)
+        invitation = Arkaan::Campaigns::Invitation.create(parameters)
       else
         # If the invitation has already been issued from one side and hasn't been accepted by the other.
-        if existing.status_accepted? || existing.status_pending? || existing.status_request?
-          raise Arkaan::Utils::Errors::BadRequest.new(action: 'creation', field: 'username', error: "already_#{existing.status.to_s}")
+        if invitation.status_accepted? || invitation.status_pending? || invitation.status_request?
+          raise Arkaan::Utils::Errors::BadRequest.new(action: 'creation', field: 'username', error: "already_#{invitation.status.to_s}")
         # If the user has been blocked by the creator of the campaign after a previous request.
-        elsif existing.status_blocked? && session.account.id.to_s != campaign.creator.id.to_s
+        elsif invitation.status_blocked? && session.account.id.to_s != campaign.creator.id.to_s
           raise Arkaan::Utils::Errors::Forbidden.new(action: 'creation', field: 'username', error: 'blocked')
         # If the creator of the campaign has been ignored by the user after a previous invitation.
-        elsif existing.status_ignored? && session.account.id.to_s == campaign.creator.id.to_s
+        elsif invitation.status_ignored? && session.account.id.to_s == campaign.creator.id.to_s
           raise Arkaan::Utils::Errors::Forbidden.new(action: 'creation', field: 'username', error: 'ignored')
         end
-        existing.status = status
-        existing.save
-        return existing
+        invitation.status = status
+        invitation.save
       end
+      if invitation.persisted? && invitation.valid?
+        inject_in_websocket(session, 'INVITATION.CREATED', invitation)
+      end
+      return invitation
+    end
+
+    def inject_in_websocket(session, message, invitation)
+      json_body = Decorators::Invitation.new(invitation).with_campaign.to_json
+      Services::Websockets.instance.make_request(session, message, invitation.to_json)
     end
 
     # Deletes an invitation if the user linked to the session is authorized to.
