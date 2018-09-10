@@ -10,6 +10,7 @@ module Controllers
     end
 
     def initialize
+      super
       create_app
     end
 
