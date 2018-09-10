@@ -1,15 +1,3 @@
-PATH
-  remote: ../arkaan
-  specs:
-    arkaan (0.10.23)
-      activemodel (= 5.1.4)
-      activesupport (= 5.1.4)
-      bcrypt (= 3.1.11)
-      mongoid (= 7.0.0.beta)
-      platform-api (= 2.1.0)
-      sinatra (= 2.0.1)
-      sinatra-contrib (= 2.0.1)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -37,6 +25,15 @@ GEM
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    arkaan (0.10.24)
+      activemodel (= 5.1.4)
+      activesupport (= 5.1.4)
+      bcrypt (= 3.1.11)
+      faraday
+      mongoid (= 7.0.0.beta)
+      platform-api (= 2.1.0)
+      sinatra (= 2.0.1)
+      sinatra-contrib (= 2.0.1)
     ast (2.4.0)
     backports (3.11.4)
     bcrypt (3.1.11)
@@ -61,6 +58,8 @@ GEM
       activesupport (>= 3.0.0)
     faker (1.8.7)
       i18n (>= 0.7)
+    faraday (0.15.2)
+      multipart-post (>= 1.2, < 3)
     heroics (0.0.24)
       erubis (~> 2.0)
       excon
@@ -82,6 +81,7 @@ GEM
       activemodel (~> 5.1)
       mongo (>= 2.4.1, < 3.0.0)
     multi_json (1.13.1)
+    multipart-post (2.0.0)
     mustermann (1.0.2)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
@@ -158,7 +158,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  arkaan (= 0.10.23)!
+  arkaan (= 0.10.24)
   bcrypt (= 3.1.11)
   database_cleaner (= 1.6.1)
   draper (= 3.0.1)
