@@ -40,6 +40,7 @@ module Services
         end
         existing.status = status
         existing.save
+        puts "Fin de la création, état de la sauvegarde du document : #{existing.persisted? ? 'sauvegardé' : 'non sauvegardé'}"
         post_create(session, existing) if existing.persisted?
         return existing
       end
@@ -49,10 +50,16 @@ module Services
     # @param session [Arkaan::Authentication::Session] the session of the user to notify
     # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
     def post_create(session, invitation)
-      Arkaan::Factories::Gateways.random('create').post(
+      puts "Passage dans le post create"
+      gateway = Arkaan::Factories::Gateways.random('create')
+      puts "Gateway sélectionnée : #{gateway.url} ; passage à la requête"
+      response = gateway.post(
         session: session,
         url: '/websockets/messages',
         params: {message: 'invitation_creation', data: invitation})
+
+      puts "Réponse de la gateway : #{response.status}"
+      response
     end
 
     # Deletes an invitation if the user linked to the session is authorized to.
