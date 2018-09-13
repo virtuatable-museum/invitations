@@ -26,7 +26,7 @@ module Services
 
       if existing.nil?
         parameters = {account: account, campaign: campaign, enum_status: status}
-        return Arkaan::Campaigns::Invitation.create(parameters)
+        existing = Arkaan::Campaigns::Invitation.create(parameters)
       else
         # If the invitation has already been issued from one side and hasn't been accepted by the other.
         if existing.status_accepted? || existing.status_pending? || existing.status_request?
@@ -40,26 +40,19 @@ module Services
         end
         existing.status = status
         existing.save
-        puts "Fin de la création, état de la sauvegarde du document : #{existing.persisted? ? 'sauvegardé' : 'non sauvegardé'}"
-        post_create(session, existing) if existing.persisted?
-        return existing
       end
+      post_create(session, existing) if existing.persisted?
+      return existing
     end
 
     # Sends a request on the websockets service to notify the user concerned byt the invitation.
     # @param session [Arkaan::Authentication::Session] the session of the user to notify
     # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
     def post_create(session, invitation)
-      puts "Passage dans le post create"
-      gateway = Arkaan::Factories::Gateways.random('create')
-      puts "Gateway sélectionnée : #{gateway.url} ; passage à la requête"
-      response = gateway.post(
+      Arkaan::Factories::Gateways.random('create').post(
         session: session,
         url: '/websockets/messages',
         params: {message: 'invitation_creation', data: invitation})
-
-      puts "Réponse de la gateway : #{response.status}"
-      response
     end
 
     # Deletes an invitation if the user linked to the session is authorized to.
