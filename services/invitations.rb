@@ -54,7 +54,7 @@ module Services
       Arkaan::Factories::Gateways.random('create').post(
         session: session,
         url: '/websockets/messages',
-        params: {message: 'invitation_creation', data: data})
+        params: {message: 'invitation_creation', data: data, receiver: invitation.account.username})
     end
 
     # Deletes an invitation if the user linked to the session is authorized to.
