@@ -3,6 +3,7 @@ Bundler.require :test
 
 require 'arkaan/specs'
 
+ENV['RACK_ENV'] = 'test'
 ENV['APP_KEY'] = 'random_key'
 
 service = Arkaan::Utils::MicroService.instance

@@ -49,10 +49,12 @@ module Services
     # @param session [Arkaan::Authentication::Session] the session of the user to notify
     # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
     def post_create(session, invitation)
+      decorator = Decorators::Invitation.new(invitation)
+      data = invitation.status_request? ? decorator.as_request : decorator.with_campaign
       Arkaan::Factories::Gateways.random('create').post(
         session: session,
         url: '/websockets/messages',
-        params: {message: 'invitation_creation', data: invitation})
+        params: {message: 'invitation_creation', data: data})
     end
 
     # Deletes an invitation if the user linked to the session is authorized to.

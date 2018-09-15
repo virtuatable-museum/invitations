@@ -1,5 +1,9 @@
 RSpec.describe Controllers::Invitations do
 
+  def clean_database
+    DatabaseCleaner[:mongoid, {connection: 'test'}].clean
+  end
+
   before do
     DatabaseCleaner.clean
   end
