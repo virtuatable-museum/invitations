@@ -24,7 +24,7 @@ module Controllers
       halt 201, {message: 'created', item: Decorators::Invitation.new(invitation).to_h}.to_json
     end
 
-    declare_route 'get', '/own' do
+    declare_route 'get', '/' do
       session = check_session('own_invitations')
       results = Services::Invitations.instance.list(session)
 

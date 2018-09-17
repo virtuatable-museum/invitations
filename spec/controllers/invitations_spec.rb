@@ -164,7 +164,7 @@ RSpec.describe Controllers::Invitations do
     end
   end
 
-  describe 'GET /own' do
+  describe 'GET /' do
 
     let!(:other_account) { create(:random_account) }
     let!(:acc_campaign) { create(:random_campaign, creator: account) }
@@ -177,48 +177,39 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {
-                'count' => 1,
-                'items' => [
-                  {
-                    'id' => invitation.id.to_s,
-                    'created_at' => invitation.created_at.utc.iso8601,
-                    'campaign' => {
-                      'id' => acc_campaign.id.to_s,
-                      'title' => acc_campaign.title,
-                      'description' => acc_campaign.description,
-                      'creator' => account.username,
-                      'tags' => [],
-                      'is_private' => true
-                    }
-                  }
-                ]
-              },
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'pending',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'is_private' => true
+                }
+              }
+            ])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -228,48 +219,39 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {
-                'count' => 1,
-                'items' => [
-                  {
-                    'id' => invitation.id.to_s,
-                    'created_at' => invitation.created_at.utc.iso8601,
-                    'campaign' => {
-                      'id' => acc_campaign.id.to_s,
-                      'title' => acc_campaign.title,
-                      'description' => acc_campaign.description,
-                      'creator' => account.username,
-                      'tags' => [],
-                      'is_private' => true
-                    }
-                  }
-                ]
-              },
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'accepted',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'is_private' => true
+                }
+              }
+            ])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -279,58 +261,54 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the requesting account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {
-                'count' => 1,
-                'items' => [
-                  {
-                    'id' => invitation.id.to_s,
-                    'created_at' => invitation.created_at.utc.iso8601,
-                    'username' => other_account.username,
-                    'campaign' => {
-                      'id' => acc_campaign.id.to_s,
-                      'title' => acc_campaign.title
-                    }
-                  }
-                ]
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'request',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'is_private' => true
+                }
               }
-            })
+            ])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {
-                'count' => 1,
-                'items' => [
-                  {
-                    'id' => invitation.id.to_s,
-                    'created_at' => invitation.created_at.utc.iso8601,
-                    'username' => other_account.username,
-                    'campaign' => {
-                      'id' => acc_campaign.id.to_s,
-                      'title' => acc_campaign.title
-                    }
-                  }
-                ]
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'request',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'is_private' => true
+                }
               }
-            })
+            ])
           end
         end
       end
@@ -340,32 +318,24 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -375,32 +345,24 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -410,32 +372,24 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -445,32 +399,24 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
@@ -480,43 +426,35 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
         describe 'With the campaign creator session' do
           before do
-            get '/own', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq({
-              'accepted' => {'count' => 0, 'items' => []},
-              'pending' => {'count' => 0, 'items' => []},
-              'request' => {'count' => 0, 'items' => []}
-            })
+            expect(JSON.parse(last_response.body)).to eq([])
           end
         end
       end
     end
 
-    it_should_behave_like 'a route', 'get', '/own'
+    it_should_behave_like 'a route', 'get', '/'
 
     describe '400 errors' do
       describe 'session ID not given' do
         before do
-          get '/own', {token: 'test_token', app_key: 'test_key'}
+          get '/', {token: 'test_token', app_key: 'test_key'}
         end
         it 'Raises a Bad Request (400) error' do
           expect(last_response.status).to be 400
@@ -534,7 +472,7 @@ RSpec.describe Controllers::Invitations do
     describe '404 errors' do
       describe 'session ID not found' do
         before do
-          get '/own', {token: 'test_token', app_key: 'test_key', session_id: 'unknown_session_id'}
+          get '/', {token: 'test_token', app_key: 'test_key', session_id: 'unknown_session_id'}
         end
         it 'Raises a Not Found (404)) error' do
           expect(last_response.status).to be 404

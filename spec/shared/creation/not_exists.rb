@@ -5,7 +5,6 @@ RSpec.shared_examples 'invitation does not exist' do
         post '/', {session_id: account_session.token, app_key: 'test_key', token: 'test_token', username: account.username, campaign_id: campaign.id.to_s}
       end
       it 'Returns a OK (200) status' do
-        puts last_response.body
         expect(last_response.status).to be 201
       end
       it 'Returns the correct body' do

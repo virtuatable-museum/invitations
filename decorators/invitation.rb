@@ -38,5 +38,23 @@ module Decorators
         }
       }
     end
+
+    def to_complete_h
+      campaign = object.campaign
+      return {
+        id: object.id.to_s,
+        status: object.status.to_s,
+        created_at: object.created_at.utc.iso8601,
+        username: object.account.username,
+        campaign: {
+          id: campaign.id.to_s,
+          title: campaign.title,
+          creator: campaign.creator.username,
+          description: campaign.description,
+          is_private: campaign.is_private,
+          tags: campaign.tags
+        }
+      }
+    end
   end
 end

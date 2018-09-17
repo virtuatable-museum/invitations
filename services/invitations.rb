@@ -106,37 +106,13 @@ module Services
     # @param session [Arkaan::Authentication::Session] the session the user is connected on.
     # @return [Hash<Symbol, Array<Arkaan::Campaigns::Invitation>>] the invitations grouped by status.
     def list(session)
-      return {
-        accepted: get_invitations(:accepted, session),
-        pending: get_invitations(:pending, session),
-        request: get_requests(session)
-      }
-    end
-
-    # Gets the invitations for the given session, with the given status, and decorates it with campaigns.
-    # @param status [Symbol, String] the status you want to select the invitations on.
-    # @param session [Arkaan::Authentication::Session] the session of the account you want the invitations from.
-    # @return [Hash] a hash with the count and items for this status and account.
-    def get_invitations(status, session)
-      invitations = Arkaan::Campaigns::Invitation.where(enum_status: status, account: session.account)
-      return {
-        count: invitations.count,
-        items: Decorators::Invitation.decorate_collection(invitations).map(&:with_campaign)
-      }
-    end
-
-    # Get all the requests in the campaign created by the account linked to the given session.
-    # @param session [Arkaan::Authentication::Session] the session of the account you want the requests from.
-    # @return [Hash] a hash with the count and items for the desired requests.
-    def get_requests(session)
-      campaign_ids = Arkaan::Campaign.where(creator: session.account).pluck(:_id)
-      in_own_campaign = 
-
-      requests = Arkaan::Campaigns::Invitation.where(enum_status: :request).any_of({:campaign_id.in => campaign_ids}, {account: session.account})
-      return {
-        count: requests.count,
-        items: Decorators::Invitation.decorate_collection(requests).map(&:as_request)
-      }
+      criteria = [
+        {account: session.account, :enum_status.in => [:accepted, :pending, :request]},
+        {enum_status: :request, :campaign_id.in => session.account.campaign_ids}
+      ]
+      order_by = {enum_status: :asc}
+      invitations =  Arkaan::Campaigns::Invitation.any_of(*criteria).order_by(order_by)
+      return Decorators::Invitation.decorate_collection(invitations).map(&:to_complete_h)
     end
   end
 end
