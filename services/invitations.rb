@@ -45,7 +45,7 @@ module Services
       return existing
     end
 
-    # Sends a request on the websockets service to notify the user concerned byt the invitation.
+    # Sends a request on the websockets service to notify the user concerned by the invitation.
     # @param session [Arkaan::Authentication::Session] the session of the user to notify
     # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
     def post_create(session, invitation)
@@ -98,9 +98,27 @@ module Services
           raise Arkaan::Utils::Errors::Forbidden.new(action: 'update', field: 'session_id', error: 'forbidden')
         end
       end
+      # The receiver is set regarding the PREVIOUS state of the invitation, before updating it.
+      receiver = invitation.status_request? ? invitation.account : invitation.campaign.creator
       invitation.status = status
       invitation.save
+      post_update(session, receiver, invitation) if invitation.valid?
       return invitation
+    end
+
+    # Sends a request on the websockets service to notify the user concerned by the invitation.
+    # @param session [Arkaan::Authentication::Session] the session of the user to notify
+    # @param receiver [Arkaan::Account] the account of the person supposed to receive the message.
+    # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
+    def post_update(session, receiver, invitation)
+      Arkaan::Factories::Gateways.random('create').post(
+        session: session,
+        url: '/websockets/messages',
+        params: {
+          message: 'invitation_update',
+          data: Decorators::Invitation.new(invitation).to_h,
+          receiver: receiver.username
+        })
     end
 
     # Gets the list of invitations concerning the given session. Selected invitations are :
