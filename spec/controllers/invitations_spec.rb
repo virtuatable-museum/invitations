@@ -195,6 +195,8 @@ RSpec.describe Controllers::Invitations do
                   'description' => acc_campaign.description,
                   'creator' => account.username,
                   'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
                   'is_private' => true
                 }
               }
@@ -237,6 +239,8 @@ RSpec.describe Controllers::Invitations do
                   'description' => acc_campaign.description,
                   'creator' => account.username,
                   'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 1,
                   'is_private' => true
                 }
               }
@@ -279,6 +283,8 @@ RSpec.describe Controllers::Invitations do
                   'description' => acc_campaign.description,
                   'creator' => account.username,
                   'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
                   'is_private' => true
                 }
               }
@@ -305,6 +311,8 @@ RSpec.describe Controllers::Invitations do
                   'description' => acc_campaign.description,
                   'creator' => account.username,
                   'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
                   'is_private' => true
                 }
               }

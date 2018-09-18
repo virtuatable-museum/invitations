@@ -1,4 +1,5 @@
 module Controllers
+
   class Invitations < Arkaan::Utils::Controller
 
     load_errors_from __FILE__
