@@ -4,7 +4,7 @@ module Controllers
 
     load_errors_from __FILE__
 
-    Services::Invitations.instance.load_rules!
+    Services::Invitations::Update.instance.load_rules!
 
     configure do
       set :show_exceptions, false
@@ -20,14 +20,14 @@ module Controllers
       account = check_account('creation')
       campaign = check_campaign('creation')
 
-      invitation = Services::Invitations.instance.create(session, campaign, account)
+      invitation = Services::Invitations::Creation.instance.create(session, campaign, account)
 
       halt 201, {message: 'created', item: Decorators::Invitation.new(invitation).to_h}.to_json
     end
 
     declare_route 'get', '/' do
       session = check_session('own_invitations')
-      results = Services::Invitations.instance.list(session)
+      results = Services::Invitations::Listing.instance.list(session)
 
       halt 200, results.to_json
     end
@@ -38,7 +38,7 @@ module Controllers
       session = check_session('update')
       invitation = check_invitation('update')
   
-      Services::Invitations.instance.update(session, invitation, params['status'])
+      Services::Invitations::Update.instance.update(session, invitation, params['status'])
 
       halt 200, {message: 'updated'}.to_json
     end
@@ -47,7 +47,7 @@ module Controllers
       session = check_session('deletion')
       invitation = check_invitation('update')
 
-      Services::Invitations.instance.delete(session, invitation)
+      Services::Invitations::Deletion.instance.delete(session, invitation)
 
       halt 200, {message: 'deleted'}.to_json
     end

@@ -2,11 +2,12 @@ module Decorators
   class Invitation < Draper::Decorator
     delegate_all
 
-    def to_h
+    def to_h(session = nil)
+      status = session.nil? ? object.status.to_s : status(session)
       campaign = object.campaign
       return {
         id: object.id.to_s,
-        status: object.status.to_s,
+        status: status,
         created_at: object.created_at.utc.iso8601,
         username: object.account.username,
         campaign: {
@@ -20,6 +21,14 @@ module Decorators
           tags: campaign.tags
         }
       }
+    end
+
+    def status(session)
+      if object.status_blocked? && object.account.id.to_s == session.account.id.to_s
+        return 'request'
+      else
+        return object.status.to_s
+      end
     end
   end
 end

@@ -367,7 +367,24 @@ RSpec.describe Controllers::Invitations do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq([])
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'ignored',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
+                  'is_private' => true
+                }
+              }
+            ])
           end
         end
         describe 'With the campaign creator session' do
@@ -394,7 +411,24 @@ RSpec.describe Controllers::Invitations do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq([])
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'request',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
+                  'is_private' => true
+                }
+              }
+            ])
           end
         end
         describe 'With the campaign creator session' do
@@ -405,7 +439,24 @@ RSpec.describe Controllers::Invitations do
             expect(last_response.status).to be 200
           end
           it 'Returns the correct body' do
-            expect(JSON.parse(last_response.body)).to eq([])
+            expect(JSON.parse(last_response.body)).to eq([
+              {
+                'id' => invitation.id.to_s,
+                'status' => 'blocked',
+                'created_at' => invitation.created_at.utc.iso8601,
+                'username' => other_account.username,
+                'campaign' => {
+                  'id' => acc_campaign.id.to_s,
+                  'title' => acc_campaign.title,
+                  'description' => acc_campaign.description,
+                  'creator' => account.username,
+                  'tags' => [],
+                  'max_players' => 5,
+                  'current_players' => 0,
+                  'is_private' => true
+                }
+              }
+            ])
           end
         end
       end
