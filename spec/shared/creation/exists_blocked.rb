@@ -10,7 +10,7 @@ RSpec.shared_examples 'invitation exists blocked' do
         expect(last_response.status).to be 403
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({
           status: 403,
           field: 'username',
@@ -18,10 +18,10 @@ RSpec.shared_examples 'invitation exists blocked' do
         })
       end
       it 'Does not create a new invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.all.count).to be 1
       end
       it 'has correctly updated the invitation status' do
-        expect(Arkaan::Campaigns::Invitation.first.status).to eq :blocked
+        expect(get_invitations.first.status).to eq :blocked
       end
     end
     describe 'created by campaign creator' do
@@ -32,14 +32,14 @@ RSpec.shared_examples 'invitation exists blocked' do
         expect(last_response.status).to be 201
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({message: 'created'})
       end
       it 'Does not create a new invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.all.count).to be 1
       end
       it 'has correctly updated the invitation status' do
-        expect(Arkaan::Campaigns::Invitation.first.status).to eq :pending
+        expect(get_invitations.first.status).to eq :pending
       end
     end
   end

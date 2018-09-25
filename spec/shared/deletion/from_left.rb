@@ -17,7 +17,7 @@ RSpec.shared_examples 'delete left invitation' do
         })
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.count).to be 1
       end
     end
     describe 'deletion by campaign creator' do
@@ -35,7 +35,7 @@ RSpec.shared_examples 'delete left invitation' do
         })
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.count).to be 1
       end
     end
   end

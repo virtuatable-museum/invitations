@@ -10,7 +10,7 @@ RSpec.shared_examples 'invitation exists pending' do
         expect(last_response.status).to be 400
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({
           status: 400,
           field: 'username',
@@ -18,7 +18,7 @@ RSpec.shared_examples 'invitation exists pending' do
         })
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.all.count).to be 1
       end
     end
     describe 'created by campaign creator' do
@@ -29,7 +29,7 @@ RSpec.shared_examples 'invitation exists pending' do
         expect(last_response.status).to be 400
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({
           status: 400,
           field: 'username',
@@ -37,7 +37,7 @@ RSpec.shared_examples 'invitation exists pending' do
         })
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.all.count).to be 1
       end
     end
   end

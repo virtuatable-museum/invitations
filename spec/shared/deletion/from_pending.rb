@@ -17,7 +17,7 @@ RSpec.shared_examples 'delete pending invitation' do
         })
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.count).to be 1
       end
     end
     describe 'deletion by campaign creator' do
@@ -31,7 +31,7 @@ RSpec.shared_examples 'delete pending invitation' do
         expect(last_response.body).to include_json({message: 'deleted'})
       end
       it 'Does not create the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+        expect(get_invitations.count).to be 0
       end
     end
   end

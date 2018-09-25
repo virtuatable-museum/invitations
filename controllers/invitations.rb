@@ -1,6 +1,9 @@
+require 'sinatra/custom_logger'
+
 module Controllers
 
   class Invitations < Arkaan::Utils::Controller
+    helpers Sinatra::CustomLogger
 
     load_errors_from __FILE__
 
@@ -8,6 +11,7 @@ module Controllers
 
     configure do
       set :show_exceptions, false
+      set :logger, Logger.new(STDOUT)
     end
 
     def initialize

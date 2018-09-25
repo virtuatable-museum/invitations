@@ -55,7 +55,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the session ID is not given' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
       describe 'The username is not given' do
@@ -73,7 +73,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the username is not given' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
       describe 'The campaign is not given' do
@@ -91,7 +91,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the campaign ID is not given' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
       describe 'Creator and account are identical' do
@@ -109,7 +109,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the account and the creator are identical' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
     end
@@ -130,7 +130,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the campaign is not found' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
       describe 'Account not found error' do
@@ -148,7 +148,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the account is not found' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
       describe 'Session not found error' do
@@ -166,7 +166,7 @@ RSpec.describe Controllers::Invitations do
           })
         end
         it 'Does not create an invitation when the session is not found' do
-          expect(Arkaan::Campaigns::Invitation.all.count).to be 0
+          expect(get_invitations.count).to be 0
         end
       end
     end

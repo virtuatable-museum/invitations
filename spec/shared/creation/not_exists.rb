@@ -8,7 +8,7 @@ RSpec.shared_examples 'invitation does not exist' do
         expect(last_response.status).to be 201
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({
           message: 'created',
           item: {
@@ -18,10 +18,10 @@ RSpec.shared_examples 'invitation does not exist' do
         })
       end
       it 'Creates the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.count).to be 1
       end
       describe 'Campaign attributes' do
-        let!(:created_invitation) { Arkaan::Campaigns::Invitation.first }
+        let!(:created_invitation) { get_invitations.first }
 
         it 'Creates the invitation with the right campaign' do
           expect(created_invitation.campaign.id.to_s).to eq(campaign.id.to_s)
@@ -42,7 +42,7 @@ RSpec.shared_examples 'invitation does not exist' do
         expect(last_response.status).to be 201
       end
       it 'Returns the correct body' do
-        invitation = Arkaan::Campaigns::Invitation.first
+        invitation = get_invitations.first
         expect(last_response.body).to include_json({
           message: 'created',
           item: {
@@ -52,10 +52,10 @@ RSpec.shared_examples 'invitation does not exist' do
         })
       end
       it 'Creates the invitation' do
-        expect(Arkaan::Campaigns::Invitation.all.count).to be 1
+        expect(get_invitations.count).to be 1
       end
       describe 'Campaign attributes' do
-        let!(:created_invitation) { Arkaan::Campaigns::Invitation.first }
+        let!(:created_invitation) { get_invitations.first }
 
         it 'Creates the invitation with the right campaign' do
           expect(created_invitation.campaign.id.to_s).to eq(campaign.id.to_s)
