@@ -36,27 +36,27 @@ module Services
             raise Arkaan::Utils::Errors::Forbidden.new(action: 'update', field: 'session_id', error: 'forbidden')
           end
         end
-        # The receiver is set regarding the PREVIOUS state of the invitation, before updating it.
-        receiver = invitation.status_request? ? invitation.account : invitation.campaign.creator
+        # The account is set regarding the PREVIOUS state of the invitation, before updating it.
+        account = invitation.status_request? ? invitation.account : invitation.campaign.creator
         invitation.status = status
         invitation.save
-        post_update(session, receiver, invitation) if invitation.valid?
+        post_update(session, account, invitation) if invitation.valid?
         return invitation
       end
 
       # Sends a request on the websockets service to notify the user concerned by the invitation.
       # @param session [Arkaan::Authentication::Session] the session of the user to notify
-      # @param receiver [Arkaan::Account] the account of the person supposed to receive the message.
+      # @param account [Arkaan::Account] the account of the person supposed to receive the message.
       # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
-      def post_update(session, receiver, invitation)
+      def post_update(session, account, invitation)
         if !invitation.status_blocked? && !invitation.status_ignored?
           Arkaan::Factories::Gateways.random('create').post(
             session: session,
-            url: '/websockets/messages',
+            url: '/repartitor/messages',
             params: {
-              message: 'invitation_update',
+              message: 'invitation_creation',
               data: Decorators::Invitation.new(invitation).to_h,
-              receiver: receiver.username
+              account_id: account.id.to_s
             })
         end
       end
