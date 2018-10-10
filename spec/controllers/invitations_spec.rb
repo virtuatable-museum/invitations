@@ -21,11 +21,6 @@ RSpec.describe Controllers::Invitations do
   let!(:decorator) { Arkaan::Decorators::Gateway.new('create', gateway) }
   let!(:query_app) { create(:application, name: 'query_app', key: 'random_key', creator: account) }
 
-  before do
-    allow_any_instance_of(Services::Invitations).to receive(:random).and_return(decorator)
-    allow_any_instance_of(Arkaan::Decorators::Gateway).to receive(:post).and_return(true)
-  end
-
   def app
     Controllers::Invitations.new
   end

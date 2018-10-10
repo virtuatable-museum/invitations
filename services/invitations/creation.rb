@@ -31,23 +31,7 @@ module Services
           existing.status = status
           existing.save
         end
-        post_create(session, existing) if existing.persisted?
         return existing
-      end
-
-      # Sends a request on the websockets service to notify the user concerned by the invitation.
-      # @param session [Arkaan::Authentication::Session] the session of the user to notify
-      # @param invitation [Arkaan::Campaigns::Invitation] the invitation created, sent as additional data to the service.
-      def post_create(session, invitation)
-        account = invitation.status_request? ? invitation.campaign.creator : invitation.account
-        Arkaan::Factories::Gateways.random('create').post(
-          session: session,
-          url: '/repartitor/messages',
-          params: {
-            message: 'invitation_creation',
-            data: Decorators::Invitation.new(invitation).to_h,
-            account_id: account.id.to_s
-          })
       end
     end
   end
