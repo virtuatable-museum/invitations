@@ -8,7 +8,13 @@ RSpec.shared_examples 'from accepted to left' do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(last_response.body).to include_json({message: 'updated'})
+        expect(last_response.body).to include_json({
+          message: 'updated',
+          item: {
+            id: accepted_invitation.id.to_s,
+            status: 'left'
+          }
+        })
       end
       it 'Has updated the invitation' do
         expect(accepted_invitation.reload.status_left?).to be true

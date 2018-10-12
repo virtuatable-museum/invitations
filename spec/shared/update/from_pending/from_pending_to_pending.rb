@@ -8,7 +8,13 @@ RSpec.shared_examples 'from pending to pending' do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(last_response.body).to include_json({message: 'updated'})
+        expect(last_response.body).to include_json({
+          message: 'updated',
+          item: {
+            id: pending_invitation.id.to_s,
+            status: 'pending'
+          }
+        })
       end
       it 'Has not updated the invitation' do
         expect(pending_invitation.reload.status_pending?).to be true
@@ -22,7 +28,13 @@ RSpec.shared_examples 'from pending to pending' do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(last_response.body).to include_json({message: 'updated'})
+        expect(last_response.body).to include_json({
+          message: 'updated',
+          item: {
+            id: pending_invitation.id.to_s,
+            status: 'pending'
+          }
+        })
       end
       it 'Has not updated the invitation' do
         expect(pending_invitation.reload.status_pending?).to be true

@@ -42,9 +42,9 @@ module Controllers
       session = check_session('update')
       invitation = check_invitation('update')
   
-      Services::Invitations::Update.instance.update(session, invitation, params['status'])
+      invitation = Services::Invitations::Update.instance.update(session, invitation, params['status'])
 
-      halt 200, {message: 'updated'}.to_json
+      halt 200, {message: 'updated', item: Decorators::Invitation.new(invitation).to_h}.to_json
     end
 
     declare_route 'delete', '/:id' do

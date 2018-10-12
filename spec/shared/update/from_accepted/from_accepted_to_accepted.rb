@@ -8,7 +8,13 @@ RSpec.shared_examples 'from accepted to accepted' do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(last_response.body).to include_json({message: 'updated'})
+        expect(last_response.body).to include_json({
+          message: 'updated',
+          item: {
+            id: accepted_invitation.id.to_s,
+            status: 'accepted'
+          }
+        })
       end
       it 'Has not updated the invitation' do
         expect(accepted_invitation.reload.status_accepted?).to be true
@@ -22,7 +28,13 @@ RSpec.shared_examples 'from accepted to accepted' do
         expect(last_response.status).to be 200
       end
       it 'Returns the correct body' do
-        expect(last_response.body).to include_json({message: 'updated'})
+        expect(last_response.body).to include_json({
+          message: 'updated',
+          item: {
+            id: accepted_invitation.id.to_s,
+            status: 'accepted'
+          }
+        })
       end
       it 'Has not updated the invitation' do
         expect(accepted_invitation.reload.status_accepted?).to be true
