@@ -4,7 +4,7 @@ RSpec.shared_examples 'invitation exists pending' do
 
     describe 'created by a user' do
       before do
-        post '/', {session_id: account_session.token, app_key: 'test_key', token: 'test_token', username: account.username, campaign_id: campaign.id.to_s}
+        post '/invitations', {session_id: account_session.token, app_key: 'test_key', token: 'test_token', username: account.username, campaign_id: campaign.id.to_s}
       end
       it 'Returns a Bad Request (400) status' do
         expect(last_response.status).to be 400
@@ -23,7 +23,7 @@ RSpec.shared_examples 'invitation exists pending' do
     end
     describe 'created by campaign creator' do
       before do
-        post '/', {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', username: account.username, campaign_id: campaign.id.to_s}
+        post '/invitations', {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', username: account.username, campaign_id: campaign.id.to_s}
       end
       it 'Returns a Bad Request (400) status' do
         expect(last_response.status).to be 400

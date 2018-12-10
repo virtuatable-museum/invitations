@@ -32,12 +32,12 @@ RSpec.describe Controllers::Invitations do
       include_examples 'Creation nominal case'
     end
 
-    it_should_behave_like 'a route', 'post', '/'
+    it_should_behave_like 'a route', 'post', '/invitations'
 
     describe 'Bad request errors' do
       describe 'The session is not given' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, campaign_id: campaign.id.to_s}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: account.username, campaign_id: campaign.id.to_s}
         end
         it 'Returns a Bad Request (400) response code when the session ID is not given' do
           expect(last_response.status).to be 400
@@ -55,7 +55,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'The username is not given' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns a Bad Request (400) response code when the username is not given' do
           expect(last_response.status).to be 400
@@ -73,7 +73,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'The campaign is not given' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token}
         end
         it 'Returns a Bad Request (400) response code when the campaign ID is not given' do
           expect(last_response.status).to be 400
@@ -91,7 +91,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'Creator and account are identical' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: creator.username, session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns an Bad Request (400) response code when the creator and the account are identical' do
           expect(last_response.status).to be 400
@@ -112,7 +112,7 @@ RSpec.describe Controllers::Invitations do
     describe 'Not found errors' do
       describe 'Campaign not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: 'any_unknown_id'}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: session.token, campaign_id: 'any_unknown_id'}
         end
         it 'Returns a Not Found (404) response code when the campaign is not found' do
           expect(last_response.status).to be 404
@@ -130,7 +130,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'Account not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: 'any_unknown_name', session_id: session.token, campaign_id: campaign.id.to_s}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: 'any_unknown_name', session_id: session.token, campaign_id: campaign.id.to_s}
         end
         it 'Returns a Not Found (404) response code when the account is not found' do
           expect(last_response.status).to be 404
@@ -148,7 +148,7 @@ RSpec.describe Controllers::Invitations do
       end
       describe 'Session not found error' do
         before do
-          post '/', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: 'any_unknown_token', campaign_id: campaign.id.to_s}
+          post '/invitations', {token: 'test_token', app_key: 'test_key', username: account.username, session_id: 'any_unknown_token', campaign_id: campaign.id.to_s}
         end
         it 'Returns a Not Found (404) response code when the session is not found' do
           expect(last_response.status).to be 404
@@ -180,7 +180,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -208,7 +208,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -224,7 +224,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -252,7 +252,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -268,7 +268,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the requesting account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -296,7 +296,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -329,7 +329,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -340,7 +340,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -356,7 +356,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -384,7 +384,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -400,7 +400,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -428,7 +428,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -461,7 +461,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -472,7 +472,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -488,7 +488,7 @@ RSpec.describe Controllers::Invitations do
 
         describe 'With the invited account session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: other_session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -499,7 +499,7 @@ RSpec.describe Controllers::Invitations do
         end
         describe 'With the campaign creator session' do
           before do
-            get '/', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+            get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: session.token}
           end
           it 'Returns a OK (200) status' do
             expect(last_response.status).to be 200
@@ -511,12 +511,12 @@ RSpec.describe Controllers::Invitations do
       end
     end
 
-    it_should_behave_like 'a route', 'get', '/'
+    it_should_behave_like 'a route', 'get', '/invitations'
 
     describe '400 errors' do
       describe 'session ID not given' do
         before do
-          get '/', {token: 'test_token', app_key: 'test_key'}
+          get '/invitations', {token: 'test_token', app_key: 'test_key'}
         end
         it 'Raises a Bad Request (400) error' do
           expect(last_response.status).to be 400
@@ -534,7 +534,7 @@ RSpec.describe Controllers::Invitations do
     describe '404 errors' do
       describe 'session ID not found' do
         before do
-          get '/', {token: 'test_token', app_key: 'test_key', session_id: 'unknown_session_id'}
+          get '/invitations', {token: 'test_token', app_key: 'test_key', session_id: 'unknown_session_id'}
         end
         it 'Raises a Not Found (404)) error' do
           expect(last_response.status).to be 404
@@ -590,7 +590,7 @@ RSpec.describe Controllers::Invitations do
         let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted'}
+          put "/invitations/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted'}
         end
         it 'Returns a Bad Request (400) when the session ID is not given' do
           expect(last_response.status).to be 400
@@ -607,7 +607,7 @@ RSpec.describe Controllers::Invitations do
         let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
-          put "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
+          put "/invitations/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', session_id: session.token}
         end
         it 'Returns a Bad Request (400) when the session ID is not given' do
           expect(last_response.status).to be 400
@@ -624,7 +624,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Not Found errors' do
       before do
-        put '/any_unknown_id', {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
+        put '/invitations/any_unknown_id', {token: 'test_token', app_key: 'test_key', status: 'accepted', session_id: session.token}
       end
       describe 'Invitation not found error' do
         it 'Returns a Not Found (404) response code when the invitation is not found' do
@@ -648,14 +648,14 @@ RSpec.describe Controllers::Invitations do
       include_examples 'Deletion nominal case' 
     end
 
-    it_should_behave_like 'a route', 'put', '/invitation_id'
+    it_should_behave_like 'a route', 'put', '/invitations/invitation_id'
 
     describe 'Bad Request errors' do
       describe 'session_id not given error' do
         let!(:invitation) { create(:pending_invitation, account: account, campaign: campaign) }
 
         before do
-          delete "/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted'}
+          delete "/invitations/#{invitation.id.to_s}", {token: 'test_token', app_key: 'test_key', status: 'accepted'}
         end
         it 'Returns a Bad Request (400) when the session ID is not given' do
           expect(last_response.status).to be 400
@@ -672,7 +672,7 @@ RSpec.describe Controllers::Invitations do
 
     describe 'Not Found errors' do
       before do
-        delete '/any_unknown_id', {token: 'test_token', app_key: 'test_key', session_id: session.token}
+        delete '/invitations/any_unknown_id', {token: 'test_token', app_key: 'test_key', session_id: session.token}
       end
       describe 'Invitation not found error' do
         it 'Returns a Not Found (404) response code when the invitation is not found' do

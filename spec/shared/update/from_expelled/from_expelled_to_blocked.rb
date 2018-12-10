@@ -2,7 +2,7 @@ RSpec.shared_examples 'from expelled to blocked' do
   describe 'Update from expelled to blocked' do
     describe 'update by the user' do
       before do
-        put "/#{expelled_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'blocked'}
+        put "/invitations/#{expelled_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'blocked'}
       end
       it 'Returns a Bad Request(400) status' do
         expect(last_response.status).to be 400
@@ -20,7 +20,7 @@ RSpec.shared_examples 'from expelled to blocked' do
     end
     describe 'update by the creator' do
       before do
-        put "/#{expelled_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'blocked'}
+        put "/invitations/#{expelled_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'blocked'}
       end
       it 'Returns a Bad Request(400) status' do
         expect(last_response.status).to be 400

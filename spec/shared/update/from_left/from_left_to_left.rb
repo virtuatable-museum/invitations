@@ -2,7 +2,7 @@ RSpec.shared_examples 'from left to left' do
   describe 'Update from left to left' do
     describe 'update by the user' do
       before do
-        put "/#{left_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
+        put "/invitations/#{left_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -22,7 +22,7 @@ RSpec.shared_examples 'from left to left' do
     end
     describe 'update by the creator' do
       before do
-        put "/#{left_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
+        put "/invitations/#{left_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'left'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200

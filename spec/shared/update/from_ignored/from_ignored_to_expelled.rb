@@ -2,7 +2,7 @@ RSpec.shared_examples 'from ignored to expelled' do
   describe 'Update from ignored to expelled' do
     describe 'update by the user' do
       before do
-        put "/#{ignored_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
+        put "/invitations/#{ignored_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a Bad Request(400) status' do
         expect(last_response.status).to be 400
@@ -20,7 +20,7 @@ RSpec.shared_examples 'from ignored to expelled' do
     end
     describe 'update by the creator' do
       before do
-        put "/#{ignored_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
+        put "/invitations/#{ignored_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a Bad Request(400) status' do
         expect(last_response.status).to be 400

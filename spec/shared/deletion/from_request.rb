@@ -4,7 +4,7 @@ RSpec.shared_examples 'delete request invitation' do
 
     describe 'deletion by a user' do
       before do
-        delete "/#{existing_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token'}
+        delete "/invitations/#{existing_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -18,7 +18,7 @@ RSpec.shared_examples 'delete request invitation' do
     end
     describe 'deletion by campaign creator' do
       before do
-        delete "/#{existing_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token'}
+        delete "/invitations/#{existing_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token'}
       end
       it 'Returns a Forbidden (403) status' do
         expect(last_response.status).to be 403

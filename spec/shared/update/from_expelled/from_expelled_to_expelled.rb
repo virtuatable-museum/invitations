@@ -2,7 +2,7 @@ RSpec.shared_examples 'from expelled to expelled' do
   describe 'Update from expelled to expelled' do
     describe 'update by the user' do
       before do
-        put "/#{expelled_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
+        put "/invitations/#{expelled_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -22,7 +22,7 @@ RSpec.shared_examples 'from expelled to expelled' do
     end
     describe 'update by the creator' do
       before do
-        put "/#{expelled_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
+        put "/invitations/#{expelled_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'expelled'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200

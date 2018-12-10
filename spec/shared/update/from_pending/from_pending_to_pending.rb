@@ -2,7 +2,7 @@ RSpec.shared_examples 'from pending to pending' do
   describe 'Update from pending to pending' do
     describe 'update by the user' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
+        put "/invitations/#{pending_invitation.id.to_s}", {session_id: account_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
@@ -22,7 +22,7 @@ RSpec.shared_examples 'from pending to pending' do
     end
     describe 'update by the creator' do
       before do
-        put "/#{pending_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
+        put "/invitations/#{pending_invitation.id.to_s}", {session_id: creator_session.token, app_key: 'test_key', token: 'test_token', status: 'pending'}
       end
       it 'Returns a OK (200) status' do
         expect(last_response.status).to be 200
