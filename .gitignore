@@ -2,4 +2,4 @@
 doc/
 coverage/
 .env
-.env_without_heroku
+log/
