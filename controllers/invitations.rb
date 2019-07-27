@@ -2,7 +2,7 @@ require 'sinatra/custom_logger'
 
 module Controllers
 
-  class Invitations < Arkaan::Utils::Controller
+  class Invitations < Arkaan::Utils::Controllers::Checked
     helpers Sinatra::CustomLogger
 
     load_errors_from __FILE__
