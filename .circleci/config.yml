@@ -13,9 +13,9 @@ commands:
     description: 'Runs a test suite given in parameter'
     parameters:
       filename:
-        type: String
+        type: string
       suite:
-        type: String
+        type: string
     steps:
       - checkout
       - restore_cache:
