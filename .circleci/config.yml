@@ -16,7 +16,6 @@ commands:
         type: String
       suite:
         type: String
-    working_directory: ~/repo
     steps:
       - checkout
       - restore_cache:
@@ -48,6 +47,7 @@ commands:
 jobs:
   test-job:
     executor: standard-docker
+    working_directory: ~/repo
     steps:
       - run-tests:
         filename: 'all'
