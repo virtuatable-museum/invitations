@@ -3,25 +3,26 @@
 # Check https://circleci.com/docs/2.0/language-ruby/ for more details
 #
 version: 2
-jobs:
-  test-job:
+executors:
+  standard-docker:
     docker:
-      # specify the version you desire here
-       - image: circleci/ruby:2.6.3-node-browsers
-       - image: mongo:4.1.4-xenial
-
+      - image: circleci/ruby:2.6.3-node-browsers
+      - image: mongo:4.1.4-xenial
+commands:
+  run-tests:
+    description: 'Runs a test suite given in parameter'
+    parameters:
+      filename:
+        type: String
+      suite:
+        type: String
     working_directory: ~/repo
-
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "Gemfile.lock" }}
-          # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
-
       - run:
           name: install dependencies
           command: |
@@ -30,29 +31,30 @@ jobs:
           paths:
             - ./vendor/bundle
           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-
-      # run tests!
       - run:
           name: run tests
           command: |
             mkdir /tmp/test-results
-            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
             
             bundle exec rspec --format html \
-                            --out /tmp/test-results/rspec.html \
+                            --out /tmp/test-results/<< parameters.filename >>.html \
                             --format progress \
-                            $TEST_FILES
-      # collect reports
+                            << parameters.suite >>
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
           destination: test-results
+jobs:
+  test-job:
+    executor: standard-docker
+    steps:
+      - run-tests:
+        filename: 'all'
+        suite: 'spec/controllers/invitations_spec.rb'
 
   deploy-job:
-    docker:
-       - image: circleci/ruby:2.6.3-node-browsers
-       - image: mongo:4.1.4-xenial
+    executor: standard-docker
     working_directory: ~/repo
     steps:
       - add_ssh_keys:
