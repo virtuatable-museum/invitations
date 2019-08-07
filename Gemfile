@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 group :development, :production, :test do
   gem 'sinatra', '2.0.5' , require: 'sinatra/base'
   gem 'mongoid', '7.0.1'
-  gem 'arkaan' , '1.5.2'
+  gem 'arkaan' , '1.6.1'
   gem 'draper' , '3.1.0'
 
   gem 'capistrano'        , '3.11.0'
@@ -27,4 +27,5 @@ group :development, :test do
   gem 'bcrypt'                 , '3.1.11'
   gem 'rubocop'
   gem 'faker'                  , '1.8.7'
+  gem 'yard'
 end

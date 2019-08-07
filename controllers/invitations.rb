@@ -19,6 +19,8 @@ module Controllers
       create_app
     end
 
+    declare_status_route
+
     declare_route 'post', '/' do
       session = check_session('creation')
       account = check_account('creation')

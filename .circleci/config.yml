@@ -1,81 +1,60 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2.1
-executors:
-  standard-docker:
-    docker:
-      - image: circleci/ruby:2.6.3-node-browsers
-      - image: mongo:4.1.4-xenial
-commands:
-  run-tests:
-    description: 'Runs a test suite given in parameter'
-    parameters:
-      filename:
-        type: string
-      suite:
-        type: string
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "Gemfile.lock" }}
-          - v1-dependencies-
-      - run:
-          name: install dependencies
-          command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle
-      - save_cache:
-          paths:
-            - ./vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-      - run:
-          name: run tests
-          command: |
-            mkdir /tmp/test-results
-            
-            bundle exec rspec --format html \
-                            --out /tmp/test-results/<< parameters.filename >>.html \
-                            --format progress \
-                            << parameters.suite >>
-      - store_test_results:
-          path: /tmp/test-results
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: test-results
+
+orbs:
+  virtuaexecutors: virtuaorbs/executors@0.1.0
+  virtuacommands: virtuaorbs/commands@0.3.0
+
 jobs:
   test-job:
-    executor: standard-docker
-    working_directory: ~/repo
+    executor: virtuaexecutors/mongoruby_2-6-3
     steps:
-      - run-tests:
-          filename: 'all'
+      - virtuacommands/run-test-suites:
+          filename: 'tests'
           suite: 'spec/controllers/invitations_spec.rb'
-
-  deploy-job:
-    executor: standard-docker
-    working_directory: ~/repo
+  doc-job:
+    executor: virtuaexecutors/mongoruby_2-6-3
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "fa:fe:e6:76:13:de:d6:1b:cc:5a:3d:42:3f:60:17:01"
-      - checkout
-      - run:
-          name: Bundle Install
-          command: bundle check || bundle install
-      - run:
-          name: Deploy to Scaleway if tests pass and branch is Master
-          command: bundle exec cap production deploy
+      - virtuacommands/generate-documentation
+  rubocop-job:
+    executor: virtuaexecutors/mongoruby_2-6-3
+    steps:
+      - virtuacommands/perform-rubocop-analysis
+  deploy-job:
+    executor: virtuaexecutors/mongoruby_2-6-3
+    steps:
+      - virtuacommands/perform-capistrano-command:
+          command: "deploy"
+
+  restart-job:
+    executor: virtuaexecutors/mongoruby_2-6-3
+    steps:
+      - virtuacommands/perform-capistrano-command:
+          command: "deploy:start"
 
 workflows:
   version: 2.1
   build-deploy:
     jobs:
-      - test-job
+      - rubocop-job
+      - test-job:
+          requires:
+            - rubocop-job
+      - doc-job:
+          requires:
+            - rubocop-job
       - deploy-job:
           requires:
             - test-job
           filters:
             branches:
               only: master
+  daily-restart:
+    triggers:
+      - schedule:
+          cron: "5 6 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - restart-job
