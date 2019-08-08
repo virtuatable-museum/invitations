@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   virtuaexecutors: virtuaorbs/executors@0.1.0
-  virtuacommands: virtuaorbs/commands@0.5.0
+  virtuacommands: virtuaorbs/commands@0.5.1
 
 jobs:
   test-creation-job:
