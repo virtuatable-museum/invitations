@@ -25,6 +25,11 @@ jobs:
     steps:
       - virtuacommands/run-rspec-tests:
           suite: 'spec/controllers/invitations_spec.rb[1:4]'
+  rubocop-job:
+    executor: virtuaexecutors/mongoruby_2-6-3
+    steps:
+      - perform-rubocop-analysis:
+          directories: "controllers/"
   doc-job:
     executor: virtuaexecutors/mongoruby_2-6-3
     steps:
@@ -44,10 +49,19 @@ workflows:
   version: 2.1
   build-deploy:
     jobs:
-      - test-creation-job
-      - test-list-job
-      - test-update-job
-      - test-deletion-job
+      - rubocop-job
+      - test-creation-job:
+          requires:
+            - rubocop-job
+      - test-list-job:
+          requires:
+            - rubocop-job
+      - test-update-job:
+          requires:
+            - rubocop-job
+      - test-deletion-job:
+          requires:
+            - rubocop-job
       - doc-job
       - deploy-job:
           requires:
@@ -61,7 +75,7 @@ workflows:
   daily-restart:
     triggers:
       - schedule:
-          cron: "5 6 * * *"
+          cron: "5 4 * * *"
           filters:
             branches:
               only:
