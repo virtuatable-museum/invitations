@@ -28,4 +28,5 @@ group :development, :test do
   gem 'rubocop'
   gem 'faker'                  , '1.8.7'
   gem 'yard'
+  gem 'rspec_junit_formatter'  , '0.4.1'
 end
