@@ -14,6 +14,7 @@ end
 
 group :developement, :production do
   gem 'rake'
+  gem 'thin', '1.7.2'
 end
 
 group :development, :test do
