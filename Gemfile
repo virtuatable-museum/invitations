@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
 group :development, :production, :test do
-  gem 'sinatra', '2.0.5' , require: 'sinatra/base'
+  gem 'sinatra', '3.0.4' , require: 'sinatra/base'
   gem 'mongoid', '7.0.1'
-  gem 'arkaan' , '1.6.1'
+  gem 'arkaan' , '2.7.1'
   gem 'draper' , '3.1.0'
 
   gem 'capistrano'        , '3.11.0'
